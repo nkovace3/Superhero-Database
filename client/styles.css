@@ -1,0 +1,52 @@
+.horizontal-container {
+    display: flex;
+    vertical-align: top;
+}
+
+h1 {
+    color: #FFEB00;
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+body {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    background-color: #C80000;
+    color: #FFEB00;
+}
+
+.container {
+    border: 3px solid #FFEB00;
+    padding: 10px;
+    margin: 10px;
+    background-color: #0060AA;
+    text-align: center; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.white-text {
+    color: white;
+}
+
+.display-list {
+    text-align: left;
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+} 
+
+.radio-container p {
+    margin-right: 10px;
+}
+
+#results-num {
+    margin-left: 10px;
+}

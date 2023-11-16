@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang = "EN">
+    <head>
+        <meta charset="UTF-8">
+        <title>Superheroes</title>
+        <link rel="stylesheet" href="styles.css">
+
+    </head>
+    <body>
+        <h1>Superheroes Database</h1>
+        <div class = "container">
+        <h2>Search All</h2>
+        <div class="horizontal-container">
+            <span id="all-radio-container" class="radio-container">
+                <input type="radio" name="all" value="all-info" checked="checked">All Info For ID
+                <input type="radio" name="all" value="all-powers">All Powers For ID
+                <input type="radio" name="all" value="all-publishers" id="publishers">All Publishers
+            </span>
+        </div>
+        <div>
+            <input type="text" id="all-search">
+            <button type="submit" id="all-submit">Submit</button>
+        </div>
+        <div class="all-results">
+            <h3>Search Results</h3>
+            <p class = "display-list" id = "all-search-results"></p>
+        </div>
+        </div>
+
+        <div class = "container">
+        <h2>Fields</h2>
+        <div class="horizontal-container" > 
+                <span id="field-radio-container" class="radio-container">
+                    <input type="radio" name="field" value="name" checked="checked">Name
+                    <input type="radio" name="field" value="Race">Race
+                    <input type="radio" name="field" value="Publisher">Publisher
+                    <input type="radio" name="field" value="powers">Powers
+                </span>
+            <select id="results-num">
+                <option value="">-#-</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+            </select> 
+            <input type = "checkbox" id="sort-box">Sort
+        </div>
+        <div>
+            <input type="text" class = "search-box" id="field-search">
+            <button type="submit" id="field-submit">Submit</button>
+        </div>
+        <div class="field-results">
+            <h3>Search Results</h3>
+            <ol class = "display-list" id = "field-search-results"></ol>
+        </div>
+        </div>
+
+        <div class = "container">
+        <div>
+            <h2>Add List</h2>
+            <div>
+                <input type="text" class = "search-box" id="new-list-name" placeholder="List Name">
+                <button type="submit" id="new-list-submit">Done</button>
+            </div>  
+            <div>
+                <select id="new-multiselect" multiple></select>
+            </div>
+        </div>
+        </div>
+
+        <div class = "container">
+        <div>
+            <h2>Update List</h2>
+            <div>
+                <input type="text" class = "search-box" id="update-list-name" placeholder="List Name">
+                <button type="submit" id="update-list-submit">Done</button>
+            </div>  
+            <div>
+                <select id="update-multiselect" multiple></select>
+            </div>
+        </div>
+        </div>
+
+        <div class = "container">
+        <div>
+            <h2>Delete List</h2>
+            <div>
+                <input type="text" class = "search-box" id="delete-list-name" placeholder="List Name">
+                <button type="submit" id="delete-list-submit">Done</button>
+            </div>  
+        </div>
+        </div>
+
+        <div class = "container">
+        <div>
+            <h2>Display List</h2>
+            <div id="sort-radio-container" class="radio-container">
+                <p>Sort By:</p>
+                <input type="radio" name="sort" value="sort-id" checked="checked">ID
+                <input type="radio" name="sort" value="sort-name">Name
+                <input type="radio" name="sort" value="sort-race">Race
+                <input type="radio" name="sort" value="sort-publisher">Publisher
+                <input type="radio" name="sort" value="sort-power">Power
+            </div>
+            <div>
+                <input type="text" class = "search-box" id="display-list-name" placeholder="List Name">
+                <button type="submit" id="display-list-submit">Done</button>
+            </div>  
+        </div>
+        <div class="field-results">
+            <h3 class = "white-text" id = "list-name-header"></h3>
+            <ol class = "display-list" id="list-list"></ol>
+        </div>
+        </div>
+
+        <script src="script.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
+    </body>
+</html>
