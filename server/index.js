@@ -1,15 +1,38 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const app = express();
 const port = 8080;
 const info_router = express.Router();
 const power_router = express.Router();
 const list_router = express.Router();
 
+mongoose.connect('mongodb://localhost/listdb')
+.then(() => {
+    console.log('Mongodb connected!');
+})
+
+const ListSchema = new Schema({
+    list_name: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    info: {
+        type: Array,
+        required: true
+    },
+    powers: {
+        type: Array,
+        required: true
+    }
+})
+
+const List = mongoose.model('list', ListSchema);
+
 const fs = require('fs');
 const info = JSON.parse(fs.readFileSync("superhero_info.json"));
 const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
-const all_lists = {};
-var list_names = [];
 
 app.use('/', express.static('../client'));
 
@@ -90,45 +113,55 @@ power_router.get('/field/:value', (req, res) => {
 
 //List router that gets list, posts lists and deletes lists
 list_router.route('/:name')
-    .get((req, res) => {
-        if(list_names.includes(req.params.name)){
-            res.send(all_lists[req.params.name]);
-        }
-        else{
-            res.status(404).send(`List ${req.params.name} does not exist!`);
-        }
+    .get(async (req, res) => {
+        try{
+            const results = await List.find({list_name: req.params.name}, { __v: 0, _id: 0});
+            if(results.length > 0) {
+                res.send(results);
+            }
+            else{
+                res.status(400).send("List name does not exist!");
+            }
+        } catch(err) {
+            console.log(err.message);
+        } 
     })
     .post((req, res) => {
-        const newList = req.body;
-        if(list_names.includes(newList["list_name"])){
-            res.status(400).send("List name already exists!")
-        }
-        else{
-            all_lists[newList["list_name"]] = newList;
-            list_names.push(newList["list_name"]);
-            res.send(newList);
-        }
+        const list = new List(req.body);
+        list.save()
+            .then(result => {
+                console.log(result);
+                res.send(list);
+            })
+            .catch(err => {
+                res.status(400).send("List name already exists!")
+                console.log(err.message);
+            })
     })
-    .delete((req, res) => {
-        const deleteList = req.params.name;
-        if(list_names.includes(deleteList)){
-            const index = list_names.indexOf(deleteList);
-            list_names.splice(index, 1);
-            res.send(all_lists[deleteList]);
-            delete all_lists[deleteList];
-        }
-        else{
-            res.status(400).send("List name doesn't exist!");
-        }
-})
+    .delete(async(req, res) => {
+            try{
+                const result = await List.deleteOne({list_name: req.params.name}, {});
+                if(result.deletedCount === 0){
+                    res.status(400).send("List name does not exist!");
+                }else{
+                    res.send(result);
+                }
+            } 
+            catch (err){
+                console.log(err.message);
+            }
+    })
 
 //Updates lists using a post method
-app.post('/api/update', (req, res) => {
+app.post('/api/update/:name', async(req, res) => {
     if(req.body){
-        const updatedList = req.body;
-        all_lists[updatedList["list_name"]].info = updatedList.info;
-        all_lists[updatedList["list_name"]].powers = updatedList.powers;
-        res.send(updatedList);
+        try{
+            const results = await List.findOneAndUpdate({list_name:req.params.name}, req.body);
+            res.send(results);
+        }
+        catch(err){
+            console.log(err.message);
+        }
     }
     else {
         res.status(404).send("List can not be updated");

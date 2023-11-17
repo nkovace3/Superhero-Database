@@ -98,7 +98,6 @@ function getAll() {
             if(res.ok){
                 res.json()
                 .then(data => {
-                    console.log(data);
                     const results = document.getElementById("all-search-results");
                     results.replaceChildren();
                     const item = document.createElement("p");
@@ -118,7 +117,6 @@ function getAll() {
             if(res.ok){
                 res.json()
                 .then(data => {
-                console.log(data);
                 let power_string = ""
                 for(let p in data){
                     if(data[p] === "True"){
@@ -141,7 +139,6 @@ function getAll() {
         fetch("api/publishers")
         .then(res => res.json()
         .then(data => {
-            console.log(data);
             let publisher_string = ""
             for(let p in data){
                 publisher_string += ` ${data[p]}<br>`;  
@@ -279,7 +276,6 @@ function createFullList(){
             info: heroArray,
             powers: powerArray
         }
-        console.log(newList);
         fetch('api/lists/' + name, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -340,7 +336,6 @@ function updateInfoList() {
     }
     Promise.all(fetchPromises)
     .then(() => {
-        console.log(heroArray);
         updatePowerList();
     })
 }
@@ -367,7 +362,6 @@ function updatePowerList(){
     }
     Promise.all(fetchPromises)
     .then(() => {
-        console.log(powerArray);
         updateFullList();
     })
 }
@@ -375,12 +369,10 @@ function updatePowerList(){
 //Sends updated list to server via POST request
 function updateFullList(){
         updatedList = {
-            list_name: update_name_sanitized,
             info: heroArray,
             powers: powerArray
         }
-        console.log(updatedList);
-        fetch('api/update', {
+        fetch('api/update/' + update_name_sanitized, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(updatedList)
@@ -420,7 +412,7 @@ function deleteList(){
         if(res.ok) {
             res.json()
             .then(data => {
-                alert(`Deleted list ${data["list_name"]}!`)
+                alert(`Deleted list!`)
             })
             .catch(err => console.log("Failed to get json object"))
         }
@@ -448,14 +440,14 @@ function displayList() {
             .then(data => {
                 header.textContent = data["list_name"];
                 const sorted = sortList(data);
-                for(let i = 0; i<data.info.length; i++){
+                for(let i = 0; i<data[0].info.length; i++){
                     const item = document.createElement("li");
-                    hero_description = `<span class = "white-text"><strong>Info</strong></span><br>Name: ${sorted.info[i].name}<br>Gender: ${sorted.info[i].Gender}<br>Eye Colour: ${sorted.info[i]["Eye color"]}<br>
-                    Race: ${sorted.info[i]["Race"]}<br>Hair Colour: ${sorted.info[i]["Hair color"]}<br>Height: ${sorted.info[i]["Height"]}<br>
-                    Publisher: ${sorted.info[i]["Publisher"]}<br>Skin Colour: ${sorted.info[i]["Skin color"]}<br>Alignment: ${sorted.info[i]["Alignment"]}<br>
-                    Weight: ${sorted.info[i]["Weight"]}<br>
+                    hero_description = `<span class = "white-text"><strong>Info</strong></span><br>Name: ${sorted[0].info[i].name}<br>Gender: ${sorted[0].info[i].Gender}<br>Eye Colour: ${sorted[0].info[i]["Eye color"]}<br>
+                    Race: ${sorted[0].info[i]["Race"]}<br>Hair Colour: ${sorted[0].info[i]["Hair color"]}<br>Height: ${sorted[0].info[i]["Height"]}<br>
+                    Publisher: ${sorted[0].info[i]["Publisher"]}<br>Skin Colour: ${sorted[0].info[i]["Skin color"]}<br>Alignment: ${sorted[0].info[i]["Alignment"]}<br>
+                    Weight: ${sorted[0].info[i]["Weight"]}<br>
                     <span class = "white-text"><strong>Powers</strong></span>`;
-                    for(var p in sorted.powers[i]){
+                    for(var p in sorted[0].powers[i]){
                         if(!(p === "id")){
                             hero_description += `<br>${p}`;
                         }   
@@ -477,12 +469,12 @@ function displayList() {
 function sortList(list) {
     var sort_choice = document.querySelector('#sort-radio-container input[type="radio"]:checked').value;
     if(sort_choice === "sort-id"){
-        const listInfo = list.info;
+        const listInfo = list[0].info;
         listInfo.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        list.info = listInfo;
+        list[0].info = listInfo;
         
-        const listPowers = list.powers;
-        list.powers = listInfo.map(infoItem => {
+        const listPowers = list[0].powers;
+        list[0].powers = listInfo.map(infoItem => {
             const matchingPowerItem = listPowers.find(powerItem => parseInt(powerItem.id) === infoItem.id);
             return matchingPowerItem;
         });
@@ -490,16 +482,16 @@ function sortList(list) {
         return list;
     }
     if(sort_choice === "sort-name"){
-        const listInfo = list.info;
+        const listInfo = list[0].info;
         listInfo.sort((a,b) => {
             const valueA = a["name"].toLowerCase(); 
             const valueB = b["name"].toLowerCase();
             return valueA.localeCompare(valueB);
         });
-        list.info = listInfo;
+        list[0].info = listInfo;
 
-        const listPowers = list.powers;
-        list.powers = listInfo.map(infoItem => {
+        const listPowers = list[0].powers;
+        list[0].powers = listInfo.map(infoItem => {
             const matchingPowerItem = listPowers.find(powerItem => parseInt(powerItem.id) === infoItem.id);
             return matchingPowerItem;
         });
@@ -507,16 +499,16 @@ function sortList(list) {
         return list;
     }
     if(sort_choice === "sort-race"){
-        const listInfo = list.info;
+        const listInfo = list[0].info;
         listInfo.sort((a,b) => {
             const valueA = a["Race"].toLowerCase(); 
             const valueB = b["Race"].toLowerCase();
             return valueA.localeCompare(valueB);
         });
-        list.info = listInfo;
+        list[0].info = listInfo;
 
-        const listPowers = list.powers;
-        list.powers = listInfo.map(infoItem => {
+        const listPowers = list[0].powers;
+        list[0].powers = listInfo.map(infoItem => {
             const matchingPowerItem = listPowers.find(powerItem => parseInt(powerItem.id) === infoItem.id);
             return matchingPowerItem;
         });
@@ -524,16 +516,16 @@ function sortList(list) {
         return list;
     }
     if(sort_choice === "sort-publisher"){
-        const listInfo = list.info;
+        const listInfo = list[0].info;
         listInfo.sort((a,b) => {
             const valueA = a["Publisher"].toLowerCase(); 
             const valueB = b["Publisher"].toLowerCase();
             return valueA.localeCompare(valueB);
         });
-        list.info = listInfo;
+        list[0].info = listInfo;
 
-        const listPowers = list.powers;
-        list.powers = listInfo.map(infoItem => {
+        const listPowers = list[0].powers;
+        list[0].powers = listInfo.map(infoItem => {
             const matchingPowerItem = listPowers.find(powerItem => parseInt(powerItem.id) === infoItem.id);
             return matchingPowerItem;
         });
@@ -541,7 +533,7 @@ function sortList(list) {
         return list;
     }
     if(sort_choice === "sort-power"){
-        const listPowers = list.powers;
+        const listPowers = list[0].powers;
         function sortSize(a, b) {
             const keysA = Object.keys(a);
             const keysB = Object.keys(b);
@@ -549,8 +541,8 @@ function sortList(list) {
         }
         listPowers.sort(sortSize);
         
-        const listInfo = list.info;
-        list.info = listPowers.map(powerItem => {
+        const listInfo = list[0].info;
+        list[0].info = listPowers.map(powerItem => {
             const matchingInfoItem = listInfo.find(infoItem => parseInt(powerItem.id) === infoItem.id);
             return matchingInfoItem;
         });
