@@ -1,3 +1,11 @@
 server/*.json
 server/node_modules/
 test.http
+client/lab4-react/public
+client/lab4-react/firebase-debug.log
+client/lab4-react/*.json
+client/lab4-react/README.node_modules
+client/node_modules
+client/*.json
+client/lab4-react/src/reportWebVitals.js
+client/lab4-react/src/setupTests.js
