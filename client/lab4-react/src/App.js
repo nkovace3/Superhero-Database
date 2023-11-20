@@ -1,13 +1,19 @@
-import logo from './logo.svg';
 import './App.css';
-import LogIn from './components/auth/LogIn';
-import CreateAccount from './components/auth/CreateAccount';
+import { BrowserRouter, Routes, Route} from 'react-router-dom';
+import UpdatePasswordPage from './pages/UpdatePasswordPage';
+import LogInCreateAccount from './pages/LogInCreateAccount';
+import UnauthenticatedHome from './pages/UnauthenticatedHome';
 
 function App() {
   return (
     <div className="App">
-      <LogIn />
-      <CreateAccount />
+      <BrowserRouter>
+        <Routes>
+          <Route index element={<LogInCreateAccount />} />
+          <Route path = '/updatePassword' element={<UpdatePasswordPage />} />
+          <Route path = '/unauthenticatedHome' element={<UnauthenticatedHome />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

@@ -1,38 +1,8 @@
 import React, { useState } from 'react';
 import { auth } from '../../authentication';
-import { signInWithEmailAndPassword, getUser, sendEmailVerification } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
-// const LogIn = () => {
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-
-//     async function signInAndSendEmailVerification(email, password) {
-//         try{
-    
-//             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-//             const user = userCredential.user;
-//             // const userRecord = await getUser(auth, user.uid);
-//             // if(userRecord.disabled){
-//             //     await auth.signOut();
-//             //     alert('User account is disabled. Cannot sign in.');
-//             //     return null;
-//             // }
-//             // if (!user.emailVerified) {
-//             // await sendEmailVerification(user);
-//             // console.log('Verification email sent to:', user.email);
-//             // }
-//             // console.log('User signed in:', user.email);
-//             return user;
-//         }
-//         catch(error) {
-//             console.log(error.message);
-//         }
-//     }
-
-    
-// };
-
-const LogIn = () => {
+        const LogIn = () => {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
 
@@ -72,7 +42,6 @@ const LogIn = () => {
                 <input type = "password" placeholder="Password" value = {password} onChange={(e) => setPassword(e.target.value)}></input>
                 <button type = "submit">Log In</button>
                 </form>
-                <p>Forgot Password?</p>
             </div>
         )
 };

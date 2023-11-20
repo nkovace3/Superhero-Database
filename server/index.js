@@ -1,11 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const Schema = mongoose.Schema;
 const app = express();
-const port = 8080;
+const port = 3000;
 const info_router = express.Router();
 const power_router = express.Router();
 const list_router = express.Router();
+const unauth_router = express.Router();
 
 mongoose.connect('mongodb://localhost/listdb')
 .then(() => {
@@ -35,6 +37,7 @@ const info = JSON.parse(fs.readFileSync("superhero_info.json"));
 const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
 
 app.use('/', express.static('../client'));
+app.use((cors()));
 
 app.use(express.json());
 
@@ -168,10 +171,36 @@ app.post('/api/update/:name', async(req, res) => {
     }
 })
 
+unauth_router.get('/search', (req, res) => {
+    const { name, race, publisher, power } = req.body;
+
+    const filteredSuperheroes = info.filter(hero => {
+        const nameMatch = !name || hero.name.toLowerCase().startsWith(name.toLowerCase());
+        const raceMatch = !race || hero.Race.toLowerCase().startsWith(race.toLowerCase());
+        const publisherMatch = !publisher || hero.Publisher.toLowerCase().startsWith(publisher.toLowerCase());
+
+        // Find superhero power data and check if it matches the search criteria
+        const heroPower = powers.find(p => p.hero_names === hero.name);
+        const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) => 
+            key.toLowerCase().startsWith(power.toLowerCase()) && value === "True"));
+
+        return nameMatch && raceMatch && publisherMatch && powerMatch;
+    });
+
+    res.send(filteredSuperheroes);
+
+});
+
+
+
+
+
+
 //Declares routers
 app.use("/api/info", info_router);
 app.use("/api/powers", power_router);
 app.use("/api/lists", list_router);
+app.use("/api/unauth", unauth_router);
 
 app.listen(port, () => {
     console.log('Listening on port ' + port);
