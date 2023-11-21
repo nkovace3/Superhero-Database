@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { auth } from '../../authentication';
 import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { useNavigate } from "react-router-dom";
 
         const LogIn = () => {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
+        const navigate = useNavigate();
 
         const signIn = (e) => {
             e.preventDefault();
@@ -16,7 +18,8 @@ import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth
                     sendEmailVerification(user);
                     alert('Account is not yet validated. Verification email sent to: ' + user.email);
                 }else{
-                    alert("Log-in successful!")
+                    alert("Log-in successful!");
+                    navigate('authenticatedHome');
                 }
                 //const userRecord = getUser(auth, user.uid);
 

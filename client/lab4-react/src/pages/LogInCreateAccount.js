@@ -7,7 +7,6 @@ const LogInCreateAccount= () => {
     return (
         <>
             <LogIn />
-            {/* <p onClick={() => navigate('updatePassword')}>Change Password</p> */}
             <CreateAccount />
             <p onClick={() => navigate('unauthenticatedHome')}>Or, proceed as unauthenticated</p>
         </>

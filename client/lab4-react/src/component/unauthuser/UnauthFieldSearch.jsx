@@ -1,76 +1,105 @@
 import React, { useState } from 'react';
-import './css/UnauthFieldSearch.css';
+import ExpandableSearchResults from './ExpandableSearchResults';
+import axios from 'axios';
+import { findBestMatch } from 'string-similarity';
 
 const UnauthFieldSearch = () => {
-    const [searchValues, setSearchValues] = useState([]);
-    const [searchQuery, setSearchQuery] = useState({
+
+    const [inputs, SetInputs] = useState({
         name: '',
         race: '',
         publisher: '',
-        powers: '',
-      });
+        power: '',
+    });
+    const [results, SetResults] = useState([]);
     
-      const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setSearchQuery((prevQuery) => ({
-          ...prevQuery,
-          [name]: value,
-        }));
+    const handleInputChange = (e) => {
+        SetInputs({ ...inputs, [e.target.name]: e.target.value});
+    };
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.get('/api/unauth/search', {
+                params: {
+                    name: inputs.name,
+                    race: inputs.race,
+                    power: inputs.power,
+                    publisher: inputs.publisher
+                }
+            });
+            SetResults(res.data);
+        }
+        catch (error) {
+            console.log("Error fetching data", error);
+        }
       };
     
-      const handleSearch = (e) => {
-        fetch('localhost:3000/api/unauth/search', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(searchQuery),
-        })
-        .then(res => {
-            if(res.ok){
-                res.json()
-                .then(data => {
-                    setSearchValues(data);
-                    console.log(data);
-                })
-            }else{
-                console.log("Error: " + res.status);
-            }
-        })
-      };
-    
-      return (
+    return (
         <flex>
+        <form onSubmit = {handleSubmit}>
           <div className="search-container">
             <div className="search-box">
               <label htmlFor="search1">Name:</label>
-              <input type="text" id="name" value={searchValues.name} onChange={handleInputChange} />
+              <input type="text" name="name" value={inputs.name} onChange={handleInputChange} />
             </div>
     
             <div className="search-box">
               <label htmlFor="search2">Race:</label>
-              <input type="text" id="race" value={searchValues.race} onChange={handleInputChange} />
+              <input type="text" name="race" value={inputs.race} onChange={handleInputChange} />
             </div>
     
             <div className="search-box">
               <label htmlFor="search3">Publisher:</label>
-              <input type="text" id="publisher" value={searchValues.publisher} onChange={handleInputChange} />
+              <input type="text" name="publisher" value={inputs.publisher} onChange={handleInputChange} />
             </div>
     
             <div className="search-box">
               <label htmlFor="search4">Power:</label>
-              <input type="text" id="search4" value={searchValues.powers} onChange={handleInputChange} />
+              <input type="text" name="power" value={inputs.power} onChange={handleInputChange} />
             </div>
-          <button type="submit" id="submit-btn" onClick={handleSearch}>Submit</button>
+          <button type="submit" id="submit-btn">Submit</button>
         </div>
-        <div>
-        <h2>Search Results:</h2>
-        <ul>
-          {searchValues.map((hero) => (
-            <li key={hero.id}>{hero.name}</li>
-          ))}
-        </ul>
-      </div>
+        </form>
+        {results.length > 0 && (
+            <div>
+            <h2>Search Results:</h2>
+            <ul>
+            {results.map((hero) => (
+                <ExpandableSearchResults key = {hero.id} title = {`${hero.name} - ${hero.Publisher}`} content = {
+                    <>
+                    Gender: {hero.Gender}
+                    <br />
+                    Eye color: {hero["Eye color"]}
+                    <br />
+                    Race: {hero["Race"]}
+                    <br />
+                    Hair color: {hero["Hair color"]}
+                    <br />
+                    Height: {hero["Height"]}
+                    <br />
+                    Skin color: {hero["Skin color"]}
+                    <br />
+                    Alignment: {hero["Alignment"]}
+                    <br />
+                    Weight: {hero["Weight"]}
+                    <br />
+                    <a href={`https://duckduckgo.com/?q=${hero.name} ${hero.Publisher}`} target="_blank" rel="noopener noreferrer">Search On DDG</a>
+                  </>
+                  } 
+                />
+                // <li class = {`expandable-item" ${isExpanded ? 'expanded' : ''}`} key={index}>
+                //     <div class = "header" onClick = {onClick}>
+                //         {hero.name} - {hero.Publisher}
+                //     </div>
+                //     <div class = {`content ${isExpanded ? 'active' : ''}`}>
+                //         <p>{hero.Height}</p>
+                //     </div>
+                // </li>
+            ))}
+            </ul>
+            </div>
+        )}
       </flex>
       );
   };

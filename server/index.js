@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const Schema = mongoose.Schema;
 const app = express();
-const port = 3000;
+const port = 5000;
 const info_router = express.Router();
 const power_router = express.Router();
 const list_router = express.Router();
@@ -172,7 +172,7 @@ app.post('/api/update/:name', async(req, res) => {
 })
 
 unauth_router.get('/search', (req, res) => {
-    const { name, race, publisher, power } = req.body;
+    const { name, race, publisher, power } = req.query;
 
     const filteredSuperheroes = info.filter(hero => {
         const nameMatch = !name || hero.name.toLowerCase().startsWith(name.toLowerCase());
@@ -187,10 +187,9 @@ unauth_router.get('/search', (req, res) => {
         return nameMatch && raceMatch && publisherMatch && powerMatch;
     });
 
-    res.send(filteredSuperheroes);
+    res.json(filteredSuperheroes);
 
 });
-
 
 
 

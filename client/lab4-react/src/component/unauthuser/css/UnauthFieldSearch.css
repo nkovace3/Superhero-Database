@@ -2,6 +2,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-direction: row;
+    background-color: #0060AA;
+    padding: 20px; /* Add padding for spacing inside the box */
+    border-radius: 8px;
+    margin: 50px;
+    border-color: #FFEB00;
   }
   
   .search-box {
@@ -17,4 +23,43 @@
   
   #submit-btn {
     margin-left: 10px; /* Adjust the spacing between search boxes and the button */
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px;
+  }
+  
+  .expandable-item {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    background-color: white;
+    color: black;
+  }
+  
+  .header {
+    background-color: #0060AA;
+    padding: 10px;
+    cursor: pointer;
+    color: #FFEB00;
+  }
+  
+  .content {
+    display: none;
+    padding: 10px;
+  }
+  
+  .content.active {
+    display: block;
+  }
+
+  .expandable-item.expanded .content {
+    display: block;
+  }
+
+  body {
+    color: #FFEB00;
+    background-color: #C80000; 
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
   }
