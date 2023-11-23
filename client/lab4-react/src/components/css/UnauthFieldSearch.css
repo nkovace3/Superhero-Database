@@ -7,7 +7,7 @@
     padding: 20px; /* Add padding for spacing inside the box */
     border-radius: 8px;
     margin: 50px;
-    border-color: #FFEB00;
+    border: 8px solid #FFEB00;
   }
   
   .search-box {

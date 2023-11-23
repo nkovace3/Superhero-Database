@@ -1,0 +1,30 @@
+.my-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  
+  .my-dropdown {
+    margin-bottom: 16px;
+  }
+
+  .my-label {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .add-list-container {
+    border: 8px solid #FFEB00;
+    padding: 20px;
+    margin-left: 300px;
+    margin-right: 300px;
+    border-radius: 8px;
+    background-color: #0060AA;
+  }
+
+  #update-password {
+    position: absolute;
+    right: 20px; /* Adjust the value as needed for the desired padding */
+  top: 10px;
+  }

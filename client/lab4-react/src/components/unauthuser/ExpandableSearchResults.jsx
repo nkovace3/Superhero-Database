@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './css/UnauthFieldSearch.css';
+import '../css/UnauthFieldSearch.css';
 
 const ExpandableSearchResults = ({title, content}) => {
     const [isExpanded, setIsExpanded] = useState(false);

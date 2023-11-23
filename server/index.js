@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const axios = require('axios');
 const Schema = mongoose.Schema;
 const app = express();
 const port = 5000;
@@ -8,6 +8,7 @@ const info_router = express.Router();
 const power_router = express.Router();
 const list_router = express.Router();
 const unauth_router = express.Router();
+
 
 mongoose.connect('mongodb://localhost/listdb')
 .then(() => {
@@ -17,18 +18,39 @@ mongoose.connect('mongodb://localhost/listdb')
 const ListSchema = new Schema({
     list_name: {
         type: String,
-        unique: true,
         required: true
     },
-    info: {
-        type: Array,
+    ids: {
+        type: [Number],
         required: true
     },
-    powers: {
-        type: Array,
+    privacy: {
+        type: Boolean,
         required: true
+    },
+    reviews: {
+        type: [String],
+        required: false
+    },
+    username: {
+        type: String,
+        required: false
+    },
+    comments: {
+        type: [String],
+        required: false
+    },
+    rating: {
+        type: [Number],
+        required: false
+    },
+    description: {
+        type: String,
+        required: false
     }
-})
+});
+
+ListSchema.index({list_name: 1, username: 1}, {unique: true});
 
 const List = mongoose.model('list', ListSchema);
 
@@ -37,7 +59,7 @@ const info = JSON.parse(fs.readFileSync("superhero_info.json"));
 const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
 
 app.use('/', express.static('../client'));
-app.use((cors()));
+
 
 app.use(express.json());
 
@@ -60,15 +82,23 @@ power_router.get('/:id', (req, res) => {
     const hero = info.find(h => h.id === parseInt(req.params.id));
     if(hero) {
         var power = powers.find(p => p.hero_names == hero.name);
+        var truePowers = {};
         if(power) {
-            res.send(power);
+            //truePowers["hero_names"] = power.hero_names;
+            for(let p in power) {
+                if(power[p] === "True"){
+                    truePowers[p] = "True";
+                }
+            }
+            //res.send(power);
+            res.send(truePowers);
         }else{
             power = {
-                hero_names: hero.name,
+                //hero_names: hero.name,
                 "No powers found!": "True"
              }
             res.send(power);
-            res.status(404).send(`Hero ${req.params.id} not found!`);
+            // res.status(404).send(`Hero ${req.params.id} not found!`);
         }
     }else{
         res.status(404).send(`Hero ${req.params.id} not found!`);
@@ -131,13 +161,14 @@ list_router.route('/:name')
     })
     .post((req, res) => {
         const list = new List(req.body);
+        console.log(req.body);
         list.save()
             .then(result => {
                 console.log(result);
                 res.send(list);
             })
             .catch(err => {
-                res.status(400).send("List name already exists!")
+                res.status(400).send(err.message);
                 console.log(err.message);
             })
     })
@@ -171,29 +202,52 @@ app.post('/api/update/:name', async(req, res) => {
     }
 })
 
-unauth_router.get('/search', (req, res) => {
+unauth_router.get('/search', async (req, res) => {
     const { name, race, publisher, power } = req.query;
 
     const filteredSuperheroes = info.filter(hero => {
         const nameMatch = !name || hero.name.toLowerCase().startsWith(name.toLowerCase());
         const raceMatch = !race || hero.Race.toLowerCase().startsWith(race.toLowerCase());
         const publisherMatch = !publisher || hero.Publisher.toLowerCase().startsWith(publisher.toLowerCase());
-
-        // Find superhero power data and check if it matches the search criteria
         const heroPower = powers.find(p => p.hero_names === hero.name);
         const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) => 
             key.toLowerCase().startsWith(power.toLowerCase()) && value === "True"));
 
         return nameMatch && raceMatch && publisherMatch && powerMatch;
     });
+    
+    const updatedSuperheroes = [];
+    for (const hero of filteredSuperheroes) {
+        try {
+        const response = await axios.get(`http://localhost:5000/api/powers/${hero.id}`);
+        hero["powers"] = response.data;
+        updatedSuperheroes.push(hero);
+        } catch (error) {
+        console.error(error);
+        }
+    }
 
-    res.json(filteredSuperheroes);
+    res.json(updatedSuperheroes);
 
 });
 
-
-
-
+app.get('/api/listnum/:displayname', async(req, res) => {
+    try{
+        const usernameToCheck = req.params.displayname;
+        const count = await List.countDocuments({username: usernameToCheck});
+        if(count === 20) {
+            res.status(400).send("Too many lists created by user ", usernameToCheck);
+        }
+        else{
+            res.sendStatus(200).send;
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+    
+ 
+});
 
 //Declares routers
 app.use("/api/info", info_router);

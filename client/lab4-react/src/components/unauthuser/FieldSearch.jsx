@@ -3,7 +3,7 @@ import ExpandableSearchResults from './ExpandableSearchResults';
 import axios from 'axios';
 import { findBestMatch } from 'string-similarity';
 
-const UnauthFieldSearch = () => {
+const FieldSearch = () => {
 
     const [inputs, SetInputs] = useState({
         name: '',
@@ -68,6 +68,9 @@ const UnauthFieldSearch = () => {
             {results.map((hero) => (
                 <ExpandableSearchResults key = {hero.id} title = {`${hero.name} - ${hero.Publisher}`} content = {
                     <>
+                    <div>
+                    <span style={{ fontWeight: 'bold'}}>Info</span>
+                    </div>
                     Gender: {hero.Gender}
                     <br />
                     Eye color: {hero["Eye color"]}
@@ -84,18 +87,18 @@ const UnauthFieldSearch = () => {
                     <br />
                     Weight: {hero["Weight"]}
                     <br />
+                    <div>
+                    <span style={{ fontWeight: 'bold'}}>Powers</span>
+                    </div>
+                    {hero["powers"] && Object.keys(hero["powers"]).map((key) => (
+                      <div key={key}>
+                        {key}
+                      </div>
+                    ))}
                     <a href={`https://duckduckgo.com/?q=${hero.name} ${hero.Publisher}`} target="_blank" rel="noopener noreferrer">Search On DDG</a>
                   </>
                   } 
                 />
-                // <li class = {`expandable-item" ${isExpanded ? 'expanded' : ''}`} key={index}>
-                //     <div class = "header" onClick = {onClick}>
-                //         {hero.name} - {hero.Publisher}
-                //     </div>
-                //     <div class = {`content ${isExpanded ? 'active' : ''}`}>
-                //         <p>{hero.Height}</p>
-                //     </div>
-                // </li>
             ))}
             </ul>
             </div>
@@ -104,4 +107,4 @@ const UnauthFieldSearch = () => {
       );
   };
   
-  export default UnauthFieldSearch;
+  export default FieldSearch;
