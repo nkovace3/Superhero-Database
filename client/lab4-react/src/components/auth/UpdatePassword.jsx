@@ -1,65 +1,48 @@
-import { auth } from '../../authentication';
 import React, { useState } from 'react';
-// import { useAuth } from 'your-firebase-auth-library'; // Import the appropriate Firebase Auth hook
+import { auth } from '../../authentication'
+import { updatePassword } from 'firebase/auth';
+import { useNavigate } from "react-router-dom";
+import '../../pages/css/LogInCreateAccountStyle.css';
 
-const UpdatePassword = () => {
-//   const auth = useAuth(); // Use the Firebase Auth hook
-
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'newPassword') {
-      setNewPassword(value);
-    } else if (name === 'confirmPassword') {
-      setConfirmPassword(value);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    try {
-      if (newPassword !== confirmPassword) {
-        setMessage('Passwords do not match.');
-        return;
-      }
-
-      await auth.currentUser.updatePassword(newPassword);
-      setMessage('Password updated successfully!');
-    } catch (error) {
-      setMessage(`Error updating password: ${error.message}`);
-    }
-  };
-
-  return (
-    <div>
-      <h2>Update Password</h2>
-      <div>
-        <label htmlFor="newPassword">New Password:</label>
-        <input
-          type="password"
-          name="newPassword"
-          value={newPassword}
-          onChange={handleChange}
-        />
+const UpdateUserPassword = () => {
+    const [newPassword, setNewPassword] = useState('');
+    const navigate = useNavigate();
+  
+    const handleUpdatePassword = async () => {
+        try {
+        const user = auth.currentUser;
+        console.log(user);
+        if (user) {
+            await updatePassword(user, newPassword);
+            alert('Password updated successfully!');
+            navigate('../authenticatedHome');
+        } else {
+          console.error('No user is currently signed in.');
+        }
+        } catch (error) {
+        console.error('Error updating password:', error.message);
+        }
+    };
+  
+    return (
+      <div className="login-create-account-container">
+        <h2>Update Password</h2>
+        <div className = "login-container">
+            
+            <label>New Password:</label>
+            <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <button onClick={handleUpdatePassword}>Update Password</button>
+        </div>
       </div>
-      <div>
-        <label htmlFor="confirmPassword">Confirm Password:</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={confirmPassword}
-          onChange={handleChange}
-        />
-      </div>
-      <button onClick={handleUpdatePassword}>Update Password</button>
-      <p>{message}</p>
-    </div>
-  );
-};
+    );
+  };
+  
+  export default UpdateUserPassword;
 
-export default UpdatePassword;
 // const UpdatePassword = () => {
 //         const [email, setEmail] = useState('');
 

@@ -34,6 +34,9 @@ import { useNavigate } from "react-router-dom";
                 if(error.code === "auth/invalid-login-credentials"){
                     alert("Log-in unsuccessful.")
                 }
+                if(error.code === "auth/user-disabled"){
+                    alert("Your account has been disabled, please contact site administrator.");
+                }
             })
         }
 
