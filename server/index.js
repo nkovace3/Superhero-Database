@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
+const admin = require('firebase-admin');
+const stringSimilarity = require('string-similarity');
 const Schema = mongoose.Schema;
 const app = express();
 const port = 5000;
@@ -60,6 +62,10 @@ const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
 
 app.use('/', express.static('../client'));
 
+const serviceAccount = require('./lab4-firebase-2da11-firebase-adminsdk-j5wxn-a2c0696d44.json');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 app.use(express.json());
 
@@ -84,21 +90,17 @@ power_router.get('/:id', (req, res) => {
         var power = powers.find(p => p.hero_names == hero.name);
         var truePowers = {};
         if(power) {
-            //truePowers["hero_names"] = power.hero_names;
             for(let p in power) {
                 if(power[p] === "True"){
                     truePowers[p] = "True";
                 }
             }
-            //res.send(power);
             res.send(truePowers);
         }else{
             power = {
-                //hero_names: hero.name,
                 "No powers found!": "True"
              }
             res.send(power);
-            // res.status(404).send(`Hero ${req.params.id} not found!`);
         }
     }else{
         res.status(404).send(`Hero ${req.params.id} not found!`);
@@ -159,31 +161,41 @@ list_router.route('/:name')
             console.log(err.message);
         } 
     })
-    .post((req, res) => {
-        const list = new List(req.body);
-        console.log(req.body);
-        list.save()
-            .then(result => {
+    .post(async(req, res) => {
+        try{
+            const idToken = req.headers['authorization'];
+            const auth = admin.auth();
+            const reso = await auth.verifyIdToken(idToken);
+            if(reso){
+                console.log(reso);
+                const list = new List(req.body);
+    
+                const result = await list.save();
                 console.log(result);
+    
                 res.send(list);
-            })
-            .catch(err => {
-                res.status(400).send(err.message);
-                console.log(err.message);
-            })
-    })
-    .delete(async(req, res) => {
-            try{
-                const result = await List.deleteOne({list_name: req.params.name}, {});
-                if(result.deletedCount === 0){
-                    res.status(400).send("List name does not exist!");
-                }else{
-                    res.send(result);
-                }
-            } 
-            catch (err){
-                console.log(err.message);
             }
+            else{
+                console.log("Not authorized");
+            }
+        }
+        catch(err) {
+            console.error(err.message);
+            res.status(400).send(err.message);
+        }
+    })    
+    .delete(async(req, res) => {
+        try{
+            const result = await List.deleteOne({list_name: req.params.name}, {});
+            if(result.deletedCount === 0){
+                res.status(400).send("List name does not exist!");
+            }else{
+                res.send(result);
+            }
+        } 
+        catch (err){
+            console.log(err.message);
+        }
     })
 
 //Updates lists using a post method
@@ -245,8 +257,6 @@ app.get('/api/listnum/:displayname', async(req, res) => {
         console.error(err);
         res.status(500).send("Internal Server Error");
     }
-    
- 
 });
 
 //Declares routers

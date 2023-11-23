@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ExpandableSearchResults from './ExpandableSearchResults';
 import axios from 'axios';
-import { findBestMatch } from 'string-similarity';
 
 const FieldSearch = () => {
 

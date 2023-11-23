@@ -9,3 +9,4 @@ client/node_modules
 client/*.json
 client/lab4-react/src/reportWebVitals.js
 client/lab4-react/src/setupTests.js
+client/lab4-angular

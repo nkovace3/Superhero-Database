@@ -54,13 +54,17 @@ const AddList = () => {
 
   const submitForm = async(e) => {
     e.preventDefault();
-    const response = await fetch('/api/listnum/'+ displayName);
+    try{
+    const response = await fetch(`/api/listnum/${displayName}`);
     if(response.ok){
         try {
+            const user = auth.currentUser;
+            const idToken = await user.getIdToken();
             const res = await fetch('/api/lists/'+ formData.list_name, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'authorization': idToken
                 },
                 body: JSON.stringify({
                     list_name: formData.list_name,
@@ -74,15 +78,19 @@ const AddList = () => {
             if(res.ok){
                 console.log("List added successfully: " + data.list_name);
             }else if (res.status === 400){
-                console.error("Duplicate lsit name");
+                
             }
         }
         catch (error) {
-            alert(error);
+            console.error("Error: " + error);
+            alert("List name already exists!");
         }
     }else{
         alert("Too many lists added by user!");
     }     
+} catch (error) {
+    console.log("Error fetching data", error);
+}
   };
 
   const idOptions = Array.from({ length: 734}, (_, index) => ({
@@ -91,8 +99,10 @@ const AddList = () => {
   }));
 
   return (
+    <div>
+    <h2>Add List</h2>
     <div class = "add-list-container">
-      <h2>Add List</h2>
+      
       <form className="my-form">
         <label className="my-label" htmlFor="list_name">List Name:</label>
         <input
@@ -137,6 +147,7 @@ const AddList = () => {
           Add List
         </button>
       </form>
+    </div>
     </div>
   );
 };

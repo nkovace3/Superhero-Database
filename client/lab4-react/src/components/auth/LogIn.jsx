@@ -21,8 +21,6 @@ import { useNavigate } from "react-router-dom";
                     alert("Log-in successful!");
                     navigate('authenticatedHome');
                 }
-                //const userRecord = getUser(auth, user.uid);
-
             }).catch((error) => {
                 console.log(error.code);
                 if(error.code === "auth/missing-password"){
