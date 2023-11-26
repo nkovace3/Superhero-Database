@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
 const admin = require('firebase-admin');
-const stringSimilarity = require('string-similarity');
+const Fuse = require('fuse.js')
 const Schema = mongoose.Schema;
 const app = express();
 const port = 5000;
@@ -10,6 +10,7 @@ const info_router = express.Router();
 const power_router = express.Router();
 const list_router = express.Router();
 const unauth_router = express.Router();
+const auth_router = express.Router();
 
 
 mongoose.connect('mongodb://localhost/listdb')
@@ -52,7 +53,9 @@ const ListSchema = new Schema({
     }
 });
 
-ListSchema.index({list_name: 1, username: 1}, {unique: true});
+// ListSchema.index({list_name: 1, username: 1}, {unique: true});
+ListSchema.index({list_name: 1, username: 1});
+
 
 const List = mongoose.model('list', ListSchema);
 
@@ -147,20 +150,22 @@ power_router.get('/field/:value', (req, res) => {
 });
 
 //List router that gets list, posts lists and deletes lists
+list_router.get('/:list_name/:username', async (req, res) => {
+    const { list_name, username } = req.params;
+    try{
+        const results = await List.find({list_name, username}, { __v: 0, _id: 0});
+        if(results) {
+            res.send(results);
+        }
+        else{
+            res.status(404).send("List name does not exist!");
+        }
+    } catch(err) {
+        console.log(err.message);
+    } 
+})
+
 list_router.route('/:name')
-    .get(async (req, res) => {
-        try{
-            const results = await List.find({list_name: req.params.name}, { __v: 0, _id: 0});
-            if(results.length > 0) {
-                res.send(results);
-            }
-            else{
-                res.status(400).send("List name does not exist!");
-            }
-        } catch(err) {
-            console.log(err.message);
-        } 
-    })
     .post(async(req, res) => {
         try{
             const idToken = req.headers['authorization'];
@@ -184,19 +189,27 @@ list_router.route('/:name')
             res.status(400).send(err.message);
         }
     })    
-    .delete(async(req, res) => {
-        try{
-            const result = await List.deleteOne({list_name: req.params.name}, {});
-            if(result.deletedCount === 0){
-                res.status(400).send("List name does not exist!");
-            }else{
-                res.send(result);
+    .delete(async (req, res) => {
+        try {
+            const idToken = req.headers['authorization'];
+            const auth = admin.auth();
+            const decodedToken = await auth.verifyIdToken(idToken);
+            if (decodedToken && decodedToken.name === req.body.username) {
+                const result = await List.deleteOne({ list_name: req.params.name }, {});
+                if (result.deletedCount === 0) {
+                    res.status(400).send("List name does not exist!");
+                } else {
+                    res.send(result);
+                }
+            } else {
+                res.status(403).send("Unauthorized");
             }
-        } 
-        catch (err){
-            console.log(err.message);
         }
-    })
+        catch (err) {
+            console.log(err.message);
+            res.status(500).send(err.message);
+        }
+    });
 
 //Updates lists using a post method
 app.post('/api/update/:name', async(req, res) => {
@@ -214,6 +227,81 @@ app.post('/api/update/:name', async(req, res) => {
     }
 })
 
+// unauth_router.get('/search', async (req, res) => {
+//     const { name, race, publisher, power } = req.query;
+
+//     const filteredSuperheroes = info.filter(hero => {
+//         const nameMatch = !name || hero.name.toLowerCase().startsWith(name.toLowerCase());
+//         const raceMatch = !race || hero.Race.toLowerCase().startsWith(race.toLowerCase());
+//         const publisherMatch = !publisher || hero.Publisher.toLowerCase().startsWith(publisher.toLowerCase());
+//         const heroPower = powers.find(p => p.hero_names === hero.name);
+//         const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) => 
+//             key.toLowerCase().startsWith(power.toLowerCase()) && value === "True"));
+
+//         return nameMatch && raceMatch && publisherMatch && powerMatch;
+//     });
+    
+//     const updatedSuperheroes = [];
+//     for (const hero of filteredSuperheroes) {
+//         try {
+//         const response = await axios.get(`http://localhost:5000/api/powers/${hero.id}`);
+//         hero["powers"] = response.data;
+//         updatedSuperheroes.push(hero);
+//         } catch (error) {
+//         console.error(error);
+//         }
+//     }
+
+//     res.json(updatedSuperheroes);
+
+// });
+
+// unauth_router.get('/search', async (req, res) => {
+//     const { name, race, publisher, power } = req.query;
+
+//     const filteredSuperheroes = info.filter(hero => {
+//         const nameMatch = !name || hero.name.toLowerCase().startsWith(name.toLowerCase());
+//         const raceMatch = !race || hero.Race.toLowerCase().startsWith(race.toLowerCase());
+//         const publisherMatch = !publisher || hero.Publisher.toLowerCase().startsWith(publisher.toLowerCase());
+//         const heroPower = powers.find(p => p.hero_names === hero.name);
+//         const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) => 
+//             key.toLowerCase().startsWith(power.toLowerCase()) && value === "True"));
+
+//         return nameMatch && raceMatch && publisherMatch && powerMatch;
+//     });
+
+//     // Use fuzzy for soft matching
+//     const softMatchedSuperheroes = info.filter(hero => {
+//         const nameRating = fuzzy.partial_ratio(name.toLowerCase(), hero.name.toLowerCase());
+//         const raceRating = fuzzy.partial_ratio(race.toLowerCase(), hero.Race.toLowerCase());
+//         const publisherRating = fuzzy.partial_ratio(publisher.toLowerCase(), hero.Publisher.toLowerCase());
+//         const powerRating = fuzzy.partial_ratio(power.toLowerCase(), heroPower);
+
+//         return (
+//             (nameRating > 80 && nameRating !== 100) ||
+//             (raceRating > 80 && raceRating !== 100) ||
+//             (publisherRating > 80 && publisherRating !== 100) ||
+//             (powerRating > 80 && powerRating !== 100)
+//         );
+//     });
+
+//     // Combine the results
+//     const combinedResults = [...filteredSuperheroes, ...softMatchedSuperheroes];
+
+//     const updatedSuperheroes = [];
+//     for (const hero of combinedResults) {
+//         try {
+//             const response = await axios.get(`http://localhost:5000/api/powers/${hero.id}`);
+//             hero["powers"] = response.data;
+//             updatedSuperheroes.push(hero);
+//         } catch (error) {
+//             console.error(error);
+//         }
+//     }
+
+//     res.json(updatedSuperheroes);
+// });
+
 unauth_router.get('/search', async (req, res) => {
     const { name, race, publisher, power } = req.query;
 
@@ -222,48 +310,91 @@ unauth_router.get('/search', async (req, res) => {
         const raceMatch = !race || hero.Race.toLowerCase().startsWith(race.toLowerCase());
         const publisherMatch = !publisher || hero.Publisher.toLowerCase().startsWith(publisher.toLowerCase());
         const heroPower = powers.find(p => p.hero_names === hero.name);
-        const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) => 
+        const powerMatch = !power || (heroPower && Object.entries(heroPower).some(([key, value]) =>
             key.toLowerCase().startsWith(power.toLowerCase()) && value === "True"));
 
         return nameMatch && raceMatch && publisherMatch && powerMatch;
     });
-    
+
+    // Fuse.js options for soft matching
+    const fuseOptions = {
+        includeScore: true,
+        threshold: 0.2,  // Adjust the threshold as needed
+    };
+
+    // Use Fuse.js for soft matching on name
+    const fuseName = new Fuse(info, { ...fuseOptions, keys: ['name'] });
+    const softMatchedName = fuseName.search(name);
+
+    // Use Fuse.js for soft matching on Race
+    const fuseRace = new Fuse(info, { ...fuseOptions, keys: ['Race'] });
+    const softMatchedRace = fuseRace.search(race);
+
+    // Use Fuse.js for soft matching on Publisher
+    const fusePublisher = new Fuse(info, { ...fuseOptions, keys: ['Publisher'] });
+    const softMatchedPublisher = fusePublisher.search(publisher);
+
+    // Use Fuse.js for soft matching on Power
+    const fusePower = new Fuse(info, { ...fuseOptions, keys: ['Power'] });
+    const softMatchedPower = fusePower.search(power);
+
+    // Combine the results
+    const softMatchedSuperheroes = [
+        ...softMatchedName.map(result => result.item),
+        ...softMatchedRace.map(result => result.item),
+        ...softMatchedPublisher.map(result => result.item),
+        ...softMatchedPower.map(result => result.item),
+    ];
+
     const updatedSuperheroes = [];
-    for (const hero of filteredSuperheroes) {
+    for (const hero of softMatchedSuperheroes) {
         try {
-        const response = await axios.get(`http://localhost:5000/api/powers/${hero.id}`);
-        hero["powers"] = response.data;
-        updatedSuperheroes.push(hero);
+            // Check if hero.id is defined before making the request
+            if (hero.id) {
+                const response = await axios.get(`http://localhost:5000/api/powers/${hero.id}`);
+                hero["powers"] = response.data;
+                updatedSuperheroes.push(hero);
+            }
         } catch (error) {
-        console.error(error);
+            console.error(error);
         }
     }
 
     res.json(updatedSuperheroes);
-
 });
 
-app.get('/api/listnum/:displayname', async(req, res) => {
-    try{
-        const usernameToCheck = req.params.displayname;
-        const count = await List.countDocuments({username: usernameToCheck});
-        if(count === 20) {
-            res.status(400).send("Too many lists created by user ", usernameToCheck);
-        }
-        else{
-            res.sendStatus(200).send;
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
+auth_router.get("/:username", async(req, res) => {
+    const searchUsername = req.params.username;
+    try {
+        const lists = await List.find({ username: searchUsername }, { __v: 0, _id: 0 });
+        res.json(lists);
+      } catch (error) {
+        console.error('Error fetching lists:', error.message);
+        res.status(500).send('Internal Server Error');
+      }
+});
+
+app.get('/api/listnum/:username', async (req, res) => {
+    const username = req.params.username;
+    try {
+      const listCount = await List.countDocuments({ username });
+        if (listCount < 20) {
+        res.json({ message: 'OK', listCount });
+      } else {
+        res.status(400).json({ message: 'Too many lists for the user', listCount });
+      }
+    } catch (error) {
+      console.error('Error checking list count:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
-});
+  });
 
 //Declares routers
 app.use("/api/info", info_router);
 app.use("/api/powers", power_router);
 app.use("/api/lists", list_router);
 app.use("/api/unauth", unauth_router);
+app.use("/api/auth/lists", auth_router);
 
 app.listen(port, () => {
     console.log('Listening on port ' + port);

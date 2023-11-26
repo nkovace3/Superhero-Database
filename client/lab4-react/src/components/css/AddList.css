@@ -26,5 +26,11 @@
   #update-password {
     position: absolute;
     right: 20px; /* Adjust the value as needed for the desired padding */
-  top: 10px;
+    top: 10px;
+  }
+
+  #sign-out {
+    position: absolute;
+    left: 20px; /* Adjust the value as needed for the desired padding */
+    top: 10px;
   }

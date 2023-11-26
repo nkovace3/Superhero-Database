@@ -76,7 +76,7 @@ const AddList = () => {
             });
             const data = await res.json();
             if(res.ok){
-                console.log("List added successfully: " + data.list_name);
+                alert("List added successfully: " + data.list_name);
             }else if (res.status === 400){
                 
             }
@@ -101,7 +101,7 @@ const AddList = () => {
   return (
     <div>
     <h2>Add List</h2>
-    <div class = "add-list-container">
+    <div className = "add-list-container">
       
       <form className="my-form">
         <label className="my-label" htmlFor="list_name">List Name:</label>
