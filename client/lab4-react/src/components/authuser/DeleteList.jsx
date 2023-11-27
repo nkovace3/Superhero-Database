@@ -8,6 +8,10 @@ const DeleteList = ({ listName, onDelete }) => {
 
   const handleDelete = async () => {
     try {
+    const confirmation = window.confirm(`Are you sure you want to delete the list "${listName}"?`);
+    if (!confirmation) {
+      return; 
+    }
       setIsDeleting(true);
       const idToken = await auth.currentUser.getIdToken();
       await axios.delete(`/api/lists/${listName}`, {

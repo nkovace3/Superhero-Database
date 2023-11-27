@@ -50,6 +50,10 @@ const ListSchema = new Schema({
     description: {
         type: String,
         required: false
+    },
+    modification_time: {
+        type: Number,
+        required: true
     }
 });
 
@@ -58,6 +62,7 @@ ListSchema.index({list_name: 1, username: 1});
 
 
 const List = mongoose.model('list', ListSchema);
+console.log(List.schema);
 
 const fs = require('fs');
 const info = JSON.parse(fs.readFileSync("superhero_info.json"));
@@ -212,19 +217,25 @@ list_router.route('/:name')
     });
 
 //Updates lists using a post method
-app.post('/api/update/:name', async(req, res) => {
-    if(req.body){
-        try{
-            const results = await List.findOneAndUpdate({list_name:req.params.name}, req.body);
-            res.send(results);
-        }
-        catch(err){
-            console.log(err.message);
-        }
-    }
-    else {
-        res.status(404).send("List can not be updated");
-    }
+app.post('/api/update/:list_name/:username', async(req, res) => {
+    const idToken = req.headers['authorization'];
+            const auth = admin.auth();
+            const reso = await auth.verifyIdToken(idToken);
+            if(reso){
+                if(req.body){
+                    try{
+                        const results = await List.findOneAndUpdate({list_name:req.params.list_name, username: req.params.username}, req.body);
+                        res.send(results);
+                    }
+                    catch(err){
+                        console.log(err.message);
+                    }
+                }
+                else {
+                    res.status(404).send("List can not be updated");
+                }
+            }
+    
 })
 
 // unauth_router.get('/search', async (req, res) => {
