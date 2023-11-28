@@ -2,10 +2,9 @@ import React from 'react';
 import { auth } from '../authentication';
 import '../components/css/AddList.css';
 import { useNavigate } from "react-router-dom";
+import UserList from '../components/admin/UserList';
 
-
-
-const AdminPage =() => {
+const AdminHome =() => {
     const navigate = useNavigate();
     return (
         <>
@@ -23,8 +22,9 @@ const AdminPage =() => {
                 </p>
             </div>
             <h1>Welcome Admin! Cheeky inshallah ewwwwwwwwwwwwwwwwwwwwwwwwwwwwww</h1>
+            <UserList />
         </>
     )
 };
 
-export default AdminPage;
+export default AdminHome;

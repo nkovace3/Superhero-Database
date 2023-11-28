@@ -443,6 +443,7 @@ const power_router = express.Router();
 const list_router = express.Router();
 const unauth_router = express.Router();
 const auth_router = express.Router();
+const admin_router = express.Router();
 
 mongoose.connect('mongodb://localhost/listdb')
 .then(() => {
@@ -493,7 +494,6 @@ ListSchema.index({list_name: 1, username: 1});
 
 
 const List = mongoose.model('list', ListSchema);
-console.log(List.schema);
 
 const fs = require('fs');
 const info = JSON.parse(fs.readFileSync("superhero_info.json"));
@@ -506,18 +506,18 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-const setAdminCustomClaim = (uid) => {
-    return admin.auth().setCustomUserClaims(uid, {admin: true});
-}
+// const setAdminCustomClaim = (uid) => {
+//     return admin.auth().setCustomUserClaims(uid, {admin: true});
+// }
 
-const userId = 'mGD1yl3p3bQwc5hL0c45wV3sOMB3';
-setAdminCustomClaim(userId)
-    .then(() => {
-        console.log("Admin claim set successfully");
-    })
-    .catch((error) => {
-        console.error('Error setting admin claim:', error);
-      });
+//const userId = 'mGD1yl3p3bQwc5hL0c45wV3sOMB3';
+// setAdminCustomClaim(userId)
+//     .then(() => {
+//         console.log("Admin claim set successfully");
+//     })
+//     .catch((error) => {
+//         console.error('Error setting admin claim:', error);
+//       });
 
 app.use(express.json());
 
@@ -865,12 +865,64 @@ auth_router.get('/public/:username', async (req, res) => {
     }
 });
 
+admin_router.get('/nonAdminUsernames', async (req, res) => {
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const userResults = await admin.auth().listUsers();
+            const users = userResults.users
+                .filter(user => !user.customClaims || !user.customClaims.admin)
+                .map(user => ({ uid: user.uid, username: user.displayName }));
+            res.send(users);
+        } else{
+            console.log("Not authorized");
+        }
+    } catch (error) {
+      console.error('Error fetching usernames:', error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+//   app.get('/listUsers', async (req, res) => {
+//     try {
+//       const listUsersResult = await admin.auth().listUsers();
+//       const users = listUsersResult.users.map(user => ({ uid: user.uid, email: user.email }));
+//       res.send(users);
+//     } catch (error) {
+//       res.status(500).send('Error listing users');
+//     }
+//   });
+
+admin_router.post('/setAdminClaim/:uid', async (req, res) => {
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const uid = req.params.uid;
+            await admin.auth().setCustomUserClaims(uid, { admin: true });
+            console.log('Admin claim set successfully');
+            res.json({ success: true });
+        }else{
+            console.log("Not authorized");
+        }
+    } catch (error) {
+      console.error('Error setting admin claim:', error);
+      res.status(403).json({ error: 'Unauthorized' });
+    }
+});
+
+
+
 //Declares routers
 app.use("/api/info", info_router);
 app.use("/api/powers", power_router);
 app.use("/api/lists", list_router);
 app.use("/api/unauth", unauth_router);
 app.use("/api/auth/lists", auth_router);
+app.use("/api/admin", admin_router);
 
 app.listen(port, () => {
     console.log('Listening on port ' + port);

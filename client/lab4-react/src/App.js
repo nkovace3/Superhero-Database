@@ -4,7 +4,7 @@ import UpdatePasswordPage from './pages/UpdatePasswordPage';
 import LogInCreateAccount from './pages/LogInCreateAccount';
 import UnauthenticatedHome from './pages/UnauthenticatedHome';
 import AuthenticatedHome from './pages/AuthenticatedHome';
-import AdminPage from './pages/AdminPage';
+import AdminHome from './pages/AdminHome';
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
           <Route path = '/updatePassword' element={<UpdatePasswordPage />} />
           <Route path = '/unauthenticatedHome' element={<UnauthenticatedHome />} />
           <Route path = '/authenticatedHome' element={<AuthenticatedHome />} />
-          <Route path = '/adminHome' element={<AdminPage />} />
+          <Route path = '/adminHome' element={<AdminHome />} />
         </Routes>
       </BrowserRouter>
     </div>

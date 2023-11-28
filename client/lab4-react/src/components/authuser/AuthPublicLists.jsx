@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ExpandableSearchResults from '../unauthuser/ExpandableSearchResults';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';  // Adjust the path based on your project structure
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const AuthPublicLists = () => {
   const [publicLists, setPublicLists] = useState([]);
@@ -37,7 +37,7 @@ const AuthPublicLists = () => {
 
   const fetchRecentPublicLists = async (displayName) => {
     try {
-      const response = await axios.get(`/api/auth/lists/public/${displayName}`); //THIS IS COMPETING WITH ANOTHER API CHANGE THE FORMATTING OF HEADER
+      const response = await axios.get(`/api/auth/lists/public/${displayName}`);
       const listsWithHeroInfo = await Promise.all(
         response.data.map(async (list) => {
           const heroInfoPromises = list.ids.map(async (id) => {
