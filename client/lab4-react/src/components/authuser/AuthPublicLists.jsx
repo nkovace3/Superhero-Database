@@ -1,28 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import axios from 'axios';
 import ExpandableSearchResults from '../unauthuser/ExpandableSearchResults';
-import DeleteList from './DeleteList';
-import AddList from './AddList';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';  // Adjust the path based on your project structure
 
-const ViewLists = () => {
-  const [user, setUser] = useState(null);
-  const [lists, setLists] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedList, setSelectedList] = useState(null);
+const AuthPublicLists = () => {
+  const [publicLists, setPublicLists] = useState([]);
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser(user);
-        console.log(user.displayName);
-        fetchLists(user.displayName);
-      } else {
-        setUser(null);
-        setLists([]);
+        setDisplayName(user.displayName);
+        fetchRecentPublicLists(user.displayName);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -42,9 +35,9 @@ const ViewLists = () => {
     }
   };
 
-  const fetchLists = async (username) => {
+  const fetchRecentPublicLists = async (displayName) => {
     try {
-      const response = await axios.get(`/api/auth/lists/${username}`);
+      const response = await axios.get(`/api/auth/lists/public/${displayName}`); //THIS IS COMPETING WITH ANOTHER API CHANGE THE FORMATTING OF HEADER
       const listsWithHeroInfo = await Promise.all(
         response.data.map(async (list) => {
           const heroInfoPromises = list.ids.map(async (id) => {
@@ -58,39 +51,30 @@ const ViewLists = () => {
           };
         })
       );
-      const sortedLists = listsWithHeroInfo.sort((a, b) => b.modification_time - a.modification_time);
-      setLists(sortedLists);
+      const sortedPublicLists = listsWithHeroInfo.sort((a, b) => b.modification_time - a.modification_time);
+      setPublicLists(sortedPublicLists.slice(0, 10)); 
     } catch (error) {
-      console.error('Error fetching lists:', error.message);
+      console.error('Error fetching recent public lists:', error.message);
     }
-  };
-
-  const handleEditClick = (list) => {
-    setSelectedList(list);
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setSelectedList(null);
-    setIsEditing(false);
   };
 
   return (
     <div>
-      <h2>View Personal Lists</h2>
-      {user && (
-        <div>
-          <ul>
-            {lists.map((list) => (
-              <li key={list.list_name}>
-                <ExpandableSearchResults
-                  title={list.list_name}
-                  content={
-                    <>
-                      <div>
-                        <span style={{ fontWeight: 'bold' }}>{list.description}</span>
-                      </div>
-                      {list.heroInfo &&
+      <h2>Recent Public Lists</h2>
+      <ul>
+        {publicLists.map((list) => (
+          <li key={list.list_name}>
+            <ExpandableSearchResults
+              title={list.list_name}
+              content={
+                <>
+                  <div>
+                    <span style={{ fontWeight: 'bold' }}>{list.description}</span>
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 'bold' }}>{`Created by: ${list.username}`}</span>
+                  </div>
+                  {list.heroInfo &&
                         list.heroInfo.map((hero) => (
                           <div key={hero.id}>
                             <ExpandableSearchResults
@@ -135,36 +119,14 @@ const ViewLists = () => {
                             />
                           </div>
                         ))}
-                      <span
-                        style={{
-                          color: 'black',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          marginRight: '10px',  
-                        }}
-                        onClick={() => handleEditClick(list)}
-                      >
-                        Edit
-                      </span>
-                      <DeleteList listName={list.list_name} onDelete={() => fetchLists(user.displayName)} />
-                      {isEditing && list.list_name === selectedList.list_name && (
-                        <AddList
-                          isEditing={isEditing}
-                          onCancelEdit={() => handleCancelEdit()}
-                          onUpdate={() => fetchLists(user.displayName)}
-                          selectedList={selectedList}
-                        />
-                      )}
-                    </>
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                </>
+              }
+            />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default ViewLists;
+export default AuthPublicLists;
