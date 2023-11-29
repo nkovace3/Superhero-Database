@@ -464,7 +464,11 @@ const ListSchema = new Schema({
         required: true
     },
     reviews: {
-        type: [String],
+        type: [{
+            review: String,
+            username: String,
+            date: Date
+        }],
         required: false
     },
     username: {
@@ -968,6 +972,42 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
     } catch (error) {
       console.error('Error enabling user:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  auth_router.post('/review/:listName', async (req, res) => {
+    const { listName } = req.params;
+    const { review, username } = req.body;  
+    try {
+        const idToken = req.headers['authorization'];
+        console.log(idToken);
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const reviewObject = {
+                review: review,
+                username: username,
+                date: Date.now()
+            }
+            const updatedList = await List.findOneAndUpdate(
+                { list_name: listName },
+                { $push: { reviews: reviewObject } },
+                { new: true } // Return the updated document
+          );
+          if (!updatedList) {
+            return res.status(404).json({ error: 'List not found' });
+          }
+          // You may want to update other fields like modification_time, etc.
+          res.status(200).json({ message: 'Review submitted successfully', updatedList });
+        }else{
+            console.log('Unauthorized access to review API.');
+            res.status(403).json({ error: 'Unauthorized' });
+        }
+      // Assuming you have a List model with a 'reviews' field
+        
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
