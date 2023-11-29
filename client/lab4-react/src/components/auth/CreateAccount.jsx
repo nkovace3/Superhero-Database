@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { auth } from '../../authentication';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
           
-const CreateAccount = () => {
+const CreateAccount = ({setJustCreatedAccount}) => {
         const [email, setEmail] = useState('');
         const [username, setUsername] = useState('');
         const [password, setPassword] = useState('');
+        //const [justCreatedAccount, setJustCreatedAccount] = useState(false);
 
         const createUserAndSendEmailVerification = (e) => {
             e.preventDefault();
@@ -17,6 +18,7 @@ const CreateAccount = () => {
                 sendEmailVerification(user)
                 .then(() => {
                     updateProfile(user, {displayName: username})
+                    setJustCreatedAccount(true);
                 });
             })
             .catch((error) => {

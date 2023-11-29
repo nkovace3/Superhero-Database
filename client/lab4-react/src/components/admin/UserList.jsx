@@ -161,7 +161,7 @@ const UserList = () => {
         const response = await fetch('/api/admin/nonAdminUsernames', {
             headers: {
             'authorization': idToken
-            }
+            },
         });
       const data = await response.json();
       setUsers(data);

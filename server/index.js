@@ -885,6 +885,25 @@ admin_router.get('/nonAdminUsernames', async (req, res) => {
     }
   });
 
+  admin_router.get('/allUsernames', async (req, res) => {
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const userResults = await admin.auth().listUsers();
+            const users = userResults.users
+                .map(user => ({ uid: user.uid, username: user.displayName }));
+            res.send(users);
+        } else{
+            console.log("Not authorized");
+        }
+    } catch (error) {
+      console.error('Error fetching usernames:', error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 //   app.get('/listUsers', async (req, res) => {
 //     try {
 //       const listUsersResult = await admin.auth().listUsers();
@@ -914,6 +933,29 @@ admin_router.post('/setAdminClaim/:uid', async (req, res) => {
     }
 });
 
+admin_router.post('/disableUser/:uid', async (req, res) => {
+    const targetUid = req.params.uid;
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+  
+        if (reso) {
+            await admin.auth().updateUser(targetUid, {
+            disabled: true,
+        });
+        console.log(`User with UID ${targetUid} has been disabled.`);
+        res.json({ success: true });
+      } else {
+        // Return unauthorized if requester is not an admin
+        console.log('Unauthorized access to disableUser API.');
+        res.status(403).json({ error: 'Unauthorized' });
+      }
+    } catch (error) {
+      console.error('Error disabling user:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
 //Declares routers
