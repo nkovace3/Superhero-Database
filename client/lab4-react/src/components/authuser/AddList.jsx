@@ -5,24 +5,43 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../authentication';
 
 const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
-  const [formData, setFormData] = useState({
-    list_name: '',
-    privacy: 'public',
-    ids: [],
-    description: '',
-  });
-
   const privacyOptions = [
     { value: true, label: 'Public' },
     { value: false, label: 'Private' },
   ];
+  
+  const [formData, setFormData] = useState({
+    list_name: '',
+    privacy: false,
+    ids: [],
+    description: '',
+  });
+
+  // useEffect(() => {
+  //   if (selectedList) {
+  //     setFormData({
+  //       list_name: selectedList.list_name,
+  //       privacy: selectedList.privacy.toString(),
+  //       ids: selectedList.ids.map((id) => ({ value: id, label: `ID ${id}` })),
+  //       description: selectedList.description || '',
+  //     });
+  //   }
+  // }, [selectedList]);
 
   useEffect(() => {
     if (selectedList) {
+      let initialIds;
+      console.log(typeof selectedList.ids);
+      if(Array.isArray(selectedList.ids) && typeof selectedList.ids[0] === 'number') {
+        initialIds = selectedList.ids.map((id) => ({ value: id, label: `ID ${id}` }));
+      }else{
+        initialIds = selectedList.ids;
+      }
+      console.log(initialIds);
       setFormData({
         list_name: selectedList.list_name,
         privacy: selectedList.privacy.toString(),
-        ids: selectedList.ids.map((id) => ({ value: id, label: `ID ${id}` })),
+        ids: initialIds,
         description: selectedList.description || '',
       });
     }
@@ -43,10 +62,16 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
     }));
   };
 
+  // const handleIdsChange = (selectedOptions) => {
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     ids: selectedOptions.map((option) => Number(option.value)),
+  //   }));
+  // };
   const handleIdsChange = (selectedOptions) => {
     setFormData((prevData) => ({
       ...prevData,
-      ids: selectedOptions.map((option) => Number(option.value)),
+      ids: selectedOptions.map((option) => ({ value: option.value, label: `ID ${option.value}` })),
     }));
   };
 
@@ -66,6 +91,7 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
   const submitForm = async(e) => {
     e.preventDefault();
     try{
+      console.log("Form data: ", formData);
       if (!selectedList) {
         const response = await fetch(`/api/listnum/${displayName}`);
         if (!response.ok) {
@@ -87,7 +113,7 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           body: JSON.stringify({
             list_name: formData.list_name,
             privacy: formData.privacy,
-            ids: formData.ids,
+            ids: formData.ids.map((option) => option.value),
             description: formData.description,
             username: displayName,
             modification_time: Date.now()
@@ -102,6 +128,8 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           // Handle 400 Bad Request if needed
         }
       }else{
+        // YOU HAVE TO SWITCH IT TO PUBLIC THEN PRIVATE FOR IT TO WORK WITHOUT THROWING AN ERROR, FIGURE THIS OUT
+        console.log(formData.privacy.value);
         const res = await fetch('/api/lists/'+ formData.list_name, {
           method: 'POST',
           headers: {
@@ -111,7 +139,7 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           body: JSON.stringify({
               list_name: formData.list_name,
               privacy: formData.privacy,
-              ids: formData.ids,
+              ids: formData.ids.map((option) => option.value),
               description: formData.description,
               username: displayName,
               modification_time: Date.now()
@@ -161,6 +189,7 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           options={privacyOptions}
           value={privacyOptions.find((option) => option.value === formData.privacy)}
           onChange={handlePrivacyChange}
+          defaultValue = {privacyOptions[1]}
         />
   
         <label className="my-label" htmlFor="ids">Superhero IDs:</label>
@@ -168,7 +197,8 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           className="my-dropdown"
           isMulti
           options = {idOptions}
-          value={formData.ids.map((id) => ({ value: id, label: `ID ${id}` }))}
+          // value={formData.ids.map((id) => ({ value: id, label: `ID ${id}` }))}
+          value = {formData.ids}
           onChange={handleIdsChange}
         />
   

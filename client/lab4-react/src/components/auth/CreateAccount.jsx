@@ -6,7 +6,6 @@ const CreateAccount = ({setJustCreatedAccount}) => {
         const [email, setEmail] = useState('');
         const [username, setUsername] = useState('');
         const [password, setPassword] = useState('');
-        //const [justCreatedAccount, setJustCreatedAccount] = useState(false);
 
         const createUserAndSendEmailVerification = (e) => {
             e.preventDefault();

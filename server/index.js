@@ -904,16 +904,6 @@ admin_router.get('/nonAdminUsernames', async (req, res) => {
     }
   });
 
-//   app.get('/listUsers', async (req, res) => {
-//     try {
-//       const listUsersResult = await admin.auth().listUsers();
-//       const users = listUsersResult.users.map(user => ({ uid: user.uid, email: user.email }));
-//       res.send(users);
-//     } catch (error) {
-//       res.status(500).send('Error listing users');
-//     }
-//   });
-
 admin_router.post('/setAdminClaim/:uid', async (req, res) => {
     try {
         const idToken = req.headers['authorization'];

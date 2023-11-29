@@ -48,41 +48,57 @@ const DisableUser = () => {
       const usersToDisable = selectedUsers;
       const usersToEnable = allUserIds.filter((uid) => !selectedUsers.includes(uid));
 
-      // Disable selected users
-      for (const uid of usersToDisable) {
+      const disablePromises = usersToDisable.map(async (uid) => {
         const response = await fetch(`/api/admin/disableUser/${uid}`, {
           method: 'POST',
           headers: {
             'authorization': idToken,
           },
         });
-
+      
         const data = await response.json();
-
+      
         if (data.success) {
           console.log(`User with UID ${uid} has been disabled.`);
         } else {
           console.error(`Failed to disable user with UID ${uid}.`);
         }
-      }
-
-      // Enable unselected users
-      for (const uid of usersToEnable) {
+      
+        return data.success;
+      });
+      
+      const enablePromises = usersToEnable.map(async (uid) => {
         const response = await fetch(`/api/admin/enableUser/${uid}`, {
           method: 'POST',
           headers: {
             'authorization': idToken,
           },
         });
-
+      
         const data = await response.json();
-
+      
         if (data.success) {
           console.log(`User with UID ${uid} has been enabled.`);
         } else {
           console.error(`Failed to enable user with UID ${uid}.`);
         }
+      
+        return data.success;
+      });
+      
+      // Wait for all disable and enable promises to complete
+      const [disableResults, enableResults] = await Promise.all([
+        Promise.all(disablePromises),
+        Promise.all(enablePromises),
+      ]);
+      
+      // Check if all operations were successful
+      if (disableResults.every((result) => result) && enableResults.every((result) => result)) {
+        alert('Disabled users updated successfully!');
+      } else {
+        alert('Some updates failed. Check the console for details.');
       }
+      
 
       // Fetch updated user data after making changes
       const updatedResponse = await fetch('/api/admin/allUsernames', {
