@@ -157,7 +157,6 @@ const UserList = () => {
   const fetchData = async () => {
     try {
         const idToken = await user.getIdToken();
-        console.log(idToken);
         const response = await fetch('/api/admin/nonAdminUsernames', {
             headers: {
             'authorization': idToken
@@ -211,7 +210,7 @@ const UserList = () => {
 
   return (
     <div>
-        <h1>Add Admins</h1>
+        <h2>Add Admins</h2>
     <div className = "user-list-container">
       <label htmlFor="userDropdown">Select User:</label>
       <Select

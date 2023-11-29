@@ -893,7 +893,7 @@ admin_router.get('/nonAdminUsernames', async (req, res) => {
         if(reso){
             const userResults = await admin.auth().listUsers();
             const users = userResults.users
-                .map(user => ({ uid: user.uid, username: user.displayName }));
+                .map(user => ({ uid: user.uid, username: user.displayName, disabled: user.disabled}));
             res.send(users);
         } else{
             console.log("Not authorized");
@@ -953,6 +953,30 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
       }
     } catch (error) {
       console.error('Error disabling user:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  admin_router.post('/enableUser/:uid', async (req, res) => {
+    const targetUid = req.params.uid;
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+  
+        if (reso) {
+            await admin.auth().updateUser(targetUid, {
+            disabled: false,
+        });
+        console.log(`User with UID ${targetUid} has been enabled.`);
+        res.json({ success: true });
+      } else {
+        // Return unauthorized if requester is not an admin
+        console.log('Unauthorized access to enableUser API.');
+        res.status(403).json({ error: 'Unauthorized' });
+      }
+    } catch (error) {
+      console.error('Error enabling user:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
