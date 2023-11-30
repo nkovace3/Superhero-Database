@@ -983,33 +983,47 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
         const auth = admin.auth();
         const reso = await auth.verifyIdToken(idToken);
         if(reso){
-            const reviewObject = {
-                review: review,
-                username: username,
-                date: Date.now()
+            if(review === ""){
+                const updatedList = await List.findOneAndUpdate(
+                    { list_name: listName },
+                    { 
+                        $push: { 
+                            rating: rating 
+                        } 
+                    },
+                    { new: true }
+              );
+              if (!updatedList) {
+                return res.status(404).json({ error: 'List not found' });
+              }
+              res.status(200).json({ message: 'Review submitted successfully', updatedList });
+            }else{
+                const reviewObject = {
+                    review: review,
+                    username: username,
+                    date: Date.now()
+                }
+                console.log(reviewObject);
+                const updatedList = await List.findOneAndUpdate(
+                    { list_name: listName },
+                    { 
+                        $push: { 
+                            reviews: reviewObject, 
+                            rating: rating 
+                        } 
+                    },
+                    { new: true } 
+              );
+              if (!updatedList) {
+                return res.status(404).json({ error: 'List not found' });
+              }
+              res.status(200).json({ message: 'Review submitted successfully', updatedList });
             }
-            console.log(reviewObject);
-            const updatedList = await List.findOneAndUpdate(
-                { list_name: listName },
-                { 
-                    $push: { 
-                        reviews: reviewObject, 
-                        rating: rating 
-                    } 
-                },
-                { new: true } // Return the updated document
-          );
-          if (!updatedList) {
-            return res.status(404).json({ error: 'List not found' });
-          }
-          // You may want to update other fields like modification_time, etc.
-          res.status(200).json({ message: 'Review submitted successfully', updatedList });
+            
         }else{
             console.log('Unauthorized access to review API.');
             res.status(403).json({ error: 'Unauthorized' });
         }
-      // Assuming you have a List model with a 'reviews' field
-        
     } catch (error) {
       console.error('Error submitting review:', error);
       res.status(500).json({ error: 'Internal server error' });
