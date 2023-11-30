@@ -977,10 +977,9 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
 
   auth_router.post('/review/:listName', async (req, res) => {
     const { listName } = req.params;
-    const { review, username } = req.body;  
+    const { review, rating, username } = req.body;  
     try {
         const idToken = req.headers['authorization'];
-        console.log(idToken);
         const auth = admin.auth();
         const reso = await auth.verifyIdToken(idToken);
         if(reso){
@@ -989,9 +988,15 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
                 username: username,
                 date: Date.now()
             }
+            console.log(reviewObject);
             const updatedList = await List.findOneAndUpdate(
                 { list_name: listName },
-                { $push: { reviews: reviewObject } },
+                { 
+                    $push: { 
+                        reviews: reviewObject, 
+                        rating: rating 
+                    } 
+                },
                 { new: true } // Return the updated document
           );
           if (!updatedList) {
