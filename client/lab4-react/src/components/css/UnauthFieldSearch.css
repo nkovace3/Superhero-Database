@@ -6,7 +6,8 @@
     background-color: #0060AA;
     padding: 20px; /* Add padding for spacing inside the box */
     border-radius: 8px;
-    margin: 50px;
+    margin-left: 50px;
+    margin-right: 50px;
     border: 8px solid #FFEB00;
   }
   

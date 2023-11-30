@@ -4,6 +4,11 @@ import '../components/css/AddList.css';
 import { useNavigate } from "react-router-dom";
 import AddAdmin from '../components/admin/AddAdmin';
 import DisableUser from '../components/admin/DisableUser';
+import FieldSearch from "../components/unauthuser/FieldSearch";
+import AddList from "../components/authuser/AddList";
+import ViewLists from "../components/authuser/ViewLists";
+import AuthPublicLists from "../components/authuser/AuthPublicLists";
+
 
 const AdminHome =() => {
     const navigate = useNavigate();
@@ -25,6 +30,10 @@ const AdminHome =() => {
             <h1>Welcome Admin! Cheeky inshallah ewwwwwwwwwwwwwwwwwwwwwwwwwwwwww</h1>
             <AddAdmin />
             <DisableUser />
+            <FieldSearch />
+            <AddList />
+            <ViewLists />
+            <AuthPublicLists/>
         </>
     )
 };

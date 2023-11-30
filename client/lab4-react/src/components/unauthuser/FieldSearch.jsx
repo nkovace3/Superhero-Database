@@ -37,6 +37,7 @@ const FieldSearch = () => {
     return (
         <flex>
         <form onSubmit = {handleSubmit}>
+          <h2>Field Search</h2>
           <div className="search-container">
             <div className="search-box">
               <label htmlFor="search1">Name:</label>
