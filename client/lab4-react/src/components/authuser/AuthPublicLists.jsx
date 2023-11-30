@@ -102,7 +102,17 @@ const AuthPublicLists = () => {
                     <span style={{ fontWeight: 'bold' }}>{list.description}</span>
                   </div>
                   <div>
+                    <span style={{ fontWeight: 'bold' }}>{`Number of Heroes: ${list.ids.length}`}</span>
+                  </div>
+                  <div>
                     <span style={{ fontWeight: 'bold' }}>{`Created by: ${list.username}`}</span>
+                  </div>
+                  <div>
+                  <span style={{ fontWeight: 'bold' }}>
+                    {list.rating.length > 0
+                      ? `Avg Rating: ${(list.rating.reduce((sum, num) => sum + num, 0) / list.rating.length).toFixed(1)}`
+                      : 'No Ratings'}
+                  </span>
                   </div>
                   {list.heroInfo &&
                         list.heroInfo.map((hero) => (
