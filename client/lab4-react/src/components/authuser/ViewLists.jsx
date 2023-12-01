@@ -155,6 +155,32 @@ const ViewLists = () => {
                           selectedList={selectedList}
                         />
                       )}
+                      <div>
+                      <span style={{ fontWeight: 'bold' }}>
+                        {list.rating.length > 0
+                          ? `Avg Rating: ${(list.rating.reduce((sum, num) => sum + num, 0) / list.rating.length).toFixed(1)}`
+                          : 'No Ratings'}
+                      </span>
+                      </div>
+                      {list.reviews.length > 0 && (
+                        <div>
+                        {list.reviews.some(review => review.hidden) && (
+                          <div>
+                            <span style={{ fontWeight: 'bold' }}>Reviews:</span>
+                            <ul>
+                              {list.reviews
+                                .filter(review => review.hidden)
+                                .map(review => (
+                                  <li key={review.date}>
+                                    <div>{`${review.username}: ${review.review}`}</div>
+                                    <div>{new Date(review.date).toLocaleDateString()}</div>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     </>
                   }
                 />

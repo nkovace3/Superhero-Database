@@ -8,6 +8,7 @@ import FieldSearch from "../components/unauthuser/FieldSearch";
 import AddList from "../components/authuser/AddList";
 import ViewLists from "../components/authuser/ViewLists";
 import AuthPublicLists from "../components/authuser/AuthPublicLists";
+import ReviewManager from '../components/admin/ReviewManager';
 
 
 const AdminHome =() => {
@@ -27,9 +28,11 @@ const AdminHome =() => {
                         Sign Out
                 </p>
             </div>
-            <h1>Welcome Admin! Cheeky inshallah ewwwwwwwwwwwwwwwwwwwwwwwwwwwwww</h1>
+            <h1>Welcome Admin!</h1>
+            <h2>This is a website that allows you to view superhero information, view favorited lists of superheroes, and more!</h2>
             <AddAdmin />
             <DisableUser />
+            <ReviewManager />
             <FieldSearch />
             <AddList />
             <ViewLists />

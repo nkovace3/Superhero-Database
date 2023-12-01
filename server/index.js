@@ -467,7 +467,8 @@ const ListSchema = new Schema({
         type: [{
             review: String,
             username: String,
-            date: Date
+            date: Date,
+            hidden: Boolean
         }],
         required: false
     },
@@ -860,9 +861,16 @@ list_router.get('/public', async (req, res) => {
 
 auth_router.get('/public/:username', async (req, res) => {
     try {
-        const { username } = req.params;
-        const authLists = await List.find({ privacy: true, username: { $ne: username } });
-        res.json(authLists);
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const { username } = req.params;
+            const authLists = await List.find({ privacy: true, username: { $ne: username } });
+            res.json(authLists);
+        }else{
+            console.log("Not authorized");
+        }
     } catch (error) {
         console.error('Error fetching authenticated lists:', error.message);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -1001,7 +1009,8 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
                 const reviewObject = {
                     review: review,
                     username: username,
-                    date: Date.now()
+                    date: Date.now(),
+                    hidden: false
                 }
                 console.log(reviewObject);
                 const updatedList = await List.findOneAndUpdate(
@@ -1028,6 +1037,87 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
       console.error('Error submitting review:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
+  });
+
+admin_router.get('/allReviews', async (req, res) => {
+    try {
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+        if(reso){
+            const allReviews = await List.find({}, 'list_name reviews');
+
+            // Extract and format reviews
+            const formattedReviews = allReviews.reduce((reviews, list) => {
+            const listReviews = list.reviews.map((review) => ({
+                reviewId: `${list._id}_${review.date.getTime()}`, // Unique ID for each review
+                listName: list.list_name,
+                reviewText: review.review,
+                hidden: review.hidden,
+                user: review.username,
+                date: review.date,
+            }));
+            return [...reviews, ...listReviews];
+            }, []);
+            res.json(formattedReviews);
+        }else{
+            console.log('Unauthorized access to allReviews API.');
+            res.status(403).json({ error: 'Unauthorized' });
+        }
+        
+    } catch (error) {
+        console.error('Error fetching reviews:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+admin_router.post('/toggleReview', async (req, res) => {
+    try {
+        const { updatedReviews } = req.body;
+    
+        const idToken = req.headers['authorization'];
+        const auth = admin.auth();
+        const reso = await auth.verifyIdToken(idToken);
+    
+        if (reso) {
+          // Update each review's visibility in the database
+          const updatePromises = updatedReviews.map(async (updatedReview) => {
+            const { listName, user, date, hidden } = updatedReview;
+            console.log(hidden);
+    
+            const list = await List.findOne({ list_name: listName });
+    
+            if (list) {
+              const reviewIndex = list.reviews.findIndex(
+                (review) => review.username === user && review.date.getTime() === new Date(date).getTime()
+              );
+    
+              if (reviewIndex !== -1) {
+                list.reviews[reviewIndex].hidden = hidden;
+                await list.save();
+                return true;
+              }
+            }
+    
+            return false;
+          });
+    
+          // Wait for all update promises to complete
+          const updateResults = await Promise.all(updatePromises);
+    
+          if (updateResults.every((result) => result)) {
+            return res.json({ success: true });
+          } else {
+            return res.status(500).json({ success: false, message: 'Failed to update review visibility' });
+          }
+        } else {
+          console.log('Unauthorized access to toggleReview API.');
+          res.status(403).json({ error: 'Unauthorized' });
+        }
+      } catch (error) {
+        console.error('Error updating reviews visibility:', error.message);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
   });
 
 

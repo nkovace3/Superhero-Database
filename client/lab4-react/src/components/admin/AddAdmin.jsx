@@ -2,30 +2,36 @@ import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { auth } from '../../authentication';
 import '../css/Admin.css';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const AddAdmin = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const user = auth.currentUser;
-
   const fetchData = async () => {
     try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/admin/nonAdminUsernames', {
-            headers: {
-            'authorization': idToken
-            },
-        });
-      const data = await response.json();
-      setUsers(data);
+        const user = auth.currentUser;
+          const idToken = await user.getIdToken();
+          const response = await fetch('/api/admin/nonAdminUsernames', {
+              headers: {
+              'authorization': idToken
+              },
+          });
+        const data = await response.json();
+        setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error.message);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchData();
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleUserChange = (selectedOption) => {
@@ -40,23 +46,22 @@ const AddAdmin = () => {
     console.log(selectedUser.value.uid);
     
     try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/admin/setAdminClaim/' + selectedUser.value.uid, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'authorization': idToken,
+        const user = auth.currentUser;  
+          const idToken = await user.getIdToken();
+          const response = await fetch('/api/admin/setAdminClaim/' + selectedUser.value.uid, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': idToken,
+          }
+        });
+        const data = await response.json();
+        if (data.success) {
+          alert(`User ${selectedUser.label} is now an admin.`);
+          // Optionally, you can update the UI or perform additional actions
+        } else {
+          alert('Failed to make the user an admin.');
         }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        alert(`User ${selectedUser.label} is now an admin.`);
-        // Optionally, you can update the UI or perform additional actions
-      } else {
-        alert('Failed to make the user an admin.');
-      }
     } catch (error) {
       console.error('Error making user an admin:', error.message);
       alert('Failed to make the user an admin.');

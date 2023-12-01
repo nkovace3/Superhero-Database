@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../authentication';
+import { onAuthStateChanged } from 'firebase/auth';
+
 const DisableUser = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -8,24 +10,37 @@ const DisableUser = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/admin/allUsernames', {
-          headers: {
-            'authorization': idToken,
-          },
-        });
+        const user = auth.currentUser;
 
-        const data = await response.json();
-        setUsers(data);
-        // Set selectedUsers based on disabled status
-        setSelectedUsers(data.filter(user => user.disabled).map(user => user.uid));
+        if (user) {
+          const idToken = await user.getIdToken();
+          const response = await fetch('/api/admin/allUsernames', {
+            headers: {
+              'authorization': idToken,
+            },
+          });
+
+          const data = await response.json();
+          setUsers(data);
+          setSelectedUsers(data.filter(user => user.disabled).map(user => user.uid));
+        }
       } catch (error) {
         console.error('Error fetching users:', error.message);
       }
     };
 
+    // Run fetchData when the component mounts
     fetchData();
-  }, [user]);
+
+    // Listen for changes in authentication state
+    const unsubscribe = onAuthStateChanged(auth, () => {
+      // When authentication state changes, run fetchData again
+      fetchData();
+    });
+
+    // Cleanup function to unsubscribe from onAuthStateChanged
+    return () => unsubscribe();
+  }, []);
 
   const handleCheckboxChange = (uid) => {
     setSelectedUsers((prevSelectedUsers) => {

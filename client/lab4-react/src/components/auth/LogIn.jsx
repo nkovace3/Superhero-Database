@@ -49,7 +49,8 @@ const LogIn = ({ justCreatedAccount }) => {
             const isAdmin = !!idTokenResult.claims.admin;
             if (isAdmin) {
               navigate('adminHome');
-            } else if (!justCreatedAccount) {
+            // } else if (!justCreatedAccount) {
+            }else{
               navigate('authenticatedHome');
             }
           })

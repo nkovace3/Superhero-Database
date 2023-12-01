@@ -40,7 +40,13 @@ const AuthPublicLists = () => {
 
   const fetchRecentPublicLists = async (displayName) => {
     try {
-      const response = await axios.get(`/api/auth/lists/public/${displayName}`);
+      const user = auth.currentUser;
+      const idToken = await user.getIdToken();
+      const response = await axios.get(`/api/auth/lists/public/${displayName}`, {
+        headers: {
+          'authorization': idToken
+        }
+      });
       const listsWithHeroInfo = await Promise.all(
         response.data.map(async (list) => {
           const heroInfoPromises = list.ids.map(async (id) => {
@@ -76,7 +82,7 @@ const AuthPublicLists = () => {
         },
       });
 
-      console.log(response.data.message);
+      alert(response.data.message);
       // Optionally, you can update the state or perform other actions after submitting the review
     } catch (error) {
       console.error('Error submitting review:', error.message);
@@ -160,7 +166,6 @@ const AuthPublicLists = () => {
                           </div>
                         ))}
                         <div>
-                    {/* Form for submitting reviews */}
                     <form onSubmit={(e) => {
                       e.preventDefault();
                       handleReviewSubmit(list.list_name);}}>
