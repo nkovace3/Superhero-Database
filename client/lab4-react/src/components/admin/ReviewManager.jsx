@@ -64,6 +64,7 @@ const ReviewManager = () => {
 
       // Fetch updated review data after making changes
       await fetchData();
+      alert("List visibility updated successfully!");
     } catch (error) {
       console.error('Error updating reviews visibility:', error.message);
     }
