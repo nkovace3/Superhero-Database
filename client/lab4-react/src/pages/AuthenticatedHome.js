@@ -33,6 +33,9 @@ const AuthenticatedHome =() => {
             <AddList />
             <ViewLists />
             <AuthPublicLists/>
+            <div>
+                <p onClick={() => navigate('../policies')}>Policies</p>
+            </div>
         </div>
     )
 };

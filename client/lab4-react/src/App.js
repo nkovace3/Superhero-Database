@@ -5,6 +5,7 @@ import LogInCreateAccount from './pages/LogInCreateAccount';
 import UnauthenticatedHome from './pages/UnauthenticatedHome';
 import AuthenticatedHome from './pages/AuthenticatedHome';
 import AdminHome from './pages/AdminHome';
+import PoliciesHome from './pages/PoliciesHome';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path = '/unauthenticatedHome' element={<UnauthenticatedHome />} />
           <Route path = '/authenticatedHome' element={<AuthenticatedHome />} />
           <Route path = '/adminHome' element={<AdminHome />} />
+          <Route path = '/policies' element={<PoliciesHome />} />
         </Routes>
       </BrowserRouter>
     </div>

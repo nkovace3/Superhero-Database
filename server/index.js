@@ -69,6 +69,23 @@ ListSchema.index({list_name: 1, username: 1});
 
 const List = mongoose.model('list', ListSchema);
 
+const PolicySchema = new Schema({
+    security_and_privacy: {
+        type: String,
+        required: false
+    },
+    dmca: {
+        type: String,
+        required: false
+    },
+    aup: {
+        type: String,
+        required: false
+    }
+});
+
+const Policies = mongoose.model('policies', PolicySchema);
+
 const fs = require('fs');
 const info = JSON.parse(fs.readFileSync("superhero_info.json"));
 const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
@@ -581,6 +598,36 @@ admin_router.post('/toggleReview', async (req, res) => {
       }
   });
 
+  admin_router.post('/update-policy', async (req, res) => {
+    const { field, value } = req.body;
+    
+    try {
+      let policy = await Policies.findOne({});
+  
+      if (!policy) {
+        // If the collection is empty, create a new document
+        policy = new Policies({});
+      }
+  
+      policy[field] = value;
+      await policy.save();
+  
+      res.json({ success: true, policy });
+    } catch (error) {
+      console.error('Error updating policy:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  });
+
+  app.get('/api/admin/get-policy', async (req, res) => {
+    try {
+      const policy = await Policies.findOne({});
+      res.json(policy || {}); 
+    } catch (error) {
+      console.error('Error fetching policy:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 //Declares routers
 app.use("/api/info", info_router);

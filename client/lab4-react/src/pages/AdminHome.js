@@ -9,7 +9,7 @@ import AddList from "../components/authuser/AddList";
 import ViewLists from "../components/authuser/ViewLists";
 import AuthPublicLists from "../components/authuser/AuthPublicLists";
 import ReviewManager from '../components/admin/ReviewManager';
-
+import PolicyUpdate from '../components/admin/PolicyUpdate';
 
 const AdminHome =() => {
     const navigate = useNavigate();
@@ -33,10 +33,14 @@ const AdminHome =() => {
             <AddAdmin />
             <DisableUser />
             <ReviewManager />
+            <PolicyUpdate />
             <FieldSearch />
             <AddList />
             <ViewLists />
             <AuthPublicLists/>
+            <div>
+                <p onClick={() => navigate('../policies')}>Policies</p>
+            </div>
         </>
     )
 };

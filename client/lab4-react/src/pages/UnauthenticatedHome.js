@@ -11,6 +11,9 @@ const UnauthenticatedHome =() => {
             <p onClick={() => navigate('../')}>Return to login</p>
             <FieldSearch />
             <UnauthFieldSearch/>
+            <div>
+                <p onClick={() => navigate('../policies')}>Policies</p>
+            </div>
         </div>
     )
 };

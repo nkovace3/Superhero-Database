@@ -91,7 +91,6 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
   const submitForm = async(e) => {
     e.preventDefault();
     try{
-      console.log("Form data: ", formData);
       if (!selectedList) {
         const response = await fetch(`/api/listnum/${displayName}`);
         if (!response.ok) {
@@ -104,6 +103,14 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
       const idToken = await user.getIdToken();
 
       if(isEditing){
+        if(formData.list_name.length === 0){
+          alert("You must enter a list name!");
+          return;
+        }
+        if(formData.ids.length === 0){
+          alert("You must enter at least 1 superhero!");
+          return;
+        }
         const res = await fetch(`/api/update/${selectedList.list_name}/${displayName}`, {
           method: 'POST',
           headers: {
@@ -128,8 +135,14 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
           // Handle 400 Bad Request if needed
         }
       }else{
-        // YOU HAVE TO SWITCH IT TO PUBLIC THEN PRIVATE FOR IT TO WORK WITHOUT THROWING AN ERROR, FIGURE THIS OUT
-        console.log(formData.privacy.value);
+        if(formData.list_name.length === 0){
+          alert("You must enter a list name!");
+          return;
+        }
+        if(formData.ids.length === 0){
+          alert("You must enter at least 1 superhero!");
+          return;
+        }
         const res = await fetch('/api/lists/'+ formData.list_name, {
           method: 'POST',
           headers: {
@@ -148,8 +161,8 @@ const AddList = ({ isEditing, onCancelEdit, selectedList, onUpdate}) => {
       const data = await res.json();
       if(res.ok){
         alert(`List ${selectedList ? 'updated' : 'added'} successfully: ${data.list_name}`);
-      }else if (res.status === 400){
-          
+      }else{
+          console.log(res.status);
       }
       }
 
