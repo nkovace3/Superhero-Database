@@ -1,0 +1,16 @@
+.policy {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;
+    display: flex;
+    align-items: center;
+    border: 8px solid #FFEB00;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #0060AA;
+    margin-left: 200px;
+    margin-right: 200px;
+}

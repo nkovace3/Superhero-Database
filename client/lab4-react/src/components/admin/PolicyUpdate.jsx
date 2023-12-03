@@ -8,24 +8,23 @@ const PolicyUpdate = () => {
   });
 
   useEffect(() => {
-    // Fetch initial data from the server when the component mounts
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/admin/get-policy'); // Adjust the endpoint accordingly
+        const response = await fetch('/api/admin/get-policy');
 
         if (!response.ok) {
           throw new Error('Failed to fetch policy data');
         }
 
         const data = await response.json();
-        setFormData(data); // Assuming the response is an object with the same structure as formData
+        setFormData(data);
       } catch (error) {
         console.error('Error fetching policy data:', error);
       }
     };
 
     fetchData();
-  }, []); // The empty dependency array ensures the effect runs only once when the component mounts
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +43,7 @@ const PolicyUpdate = () => {
         },
         body: JSON.stringify({
           field,
-          value: formData[field],
+          value: formData[field] + ' Last Updated: ' + new Date().toLocaleDateString('en-US')
         }),
       });
 
@@ -52,8 +51,7 @@ const PolicyUpdate = () => {
         throw new Error('Failed to update policy');
       }
 
-      // Optionally, you can handle success or show a notification
-      console.log(`${field} updated successfully!`);
+      alert(`${field} updated successfully!`);
     } catch (error) {
       console.error('Error updating policy:', error);
     }
