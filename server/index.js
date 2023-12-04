@@ -86,6 +86,27 @@ const PolicySchema = new Schema({
 
 const Policies = mongoose.model('policies', PolicySchema);
 
+const ReportSchema = new Schema({
+    reviewId: {
+        type: String,
+        required: true
+    },
+    reportText: {
+        type: String,
+        required: true
+    },
+    reportType: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    }
+});
+
+const Reports = mongoose.model('reports', ReportSchema);
+
 const fs = require('fs');
 const info = JSON.parse(fs.readFileSync("superhero_info.json"));
 const powers = JSON.parse(fs.readFileSync("superhero_powers.json"));
@@ -490,7 +511,6 @@ admin_router.post('/disableUser/:uid', async (req, res) => {
                     date: Date.now(),
                     hidden: false
                 }
-                console.log(reviewObject);
                 const updatedList = await List.findOneAndUpdate(
                     { list_name: listName },
                     { 
@@ -626,6 +646,32 @@ admin_router.post('/toggleReview', async (req, res) => {
     } catch (error) {
       console.error('Error fetching policy:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  admin_router.post('/reportSubmit', async (req, res) => {
+    try {
+      const { reviewId, reportText, reportType } = req.body;
+  
+      // Assuming that reviewId is in the format 'listId_reviewId'
+  
+      // Find the list with the given listId and review with reviewIdInList
+  
+      // Create a new Report document
+      const newReport = new Reports({
+        reviewId,
+        reportText,
+        reportType,
+        date: new Date(),
+      });
+  
+      // Save the report to the database
+      await newReport.save();
+  
+      res.json({ success: true, message: 'Report submitted successfully' });
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   });
 
