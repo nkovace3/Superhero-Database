@@ -10,6 +10,7 @@ import ViewLists from "../components/authuser/ViewLists";
 import AuthPublicLists from "../components/authuser/AuthPublicLists";
 import ReviewManager from '../components/admin/ReviewManager';
 import PolicyUpdate from '../components/admin/PolicyUpdate';
+import DisplayReports from '../components/admin/DisplayReports';
 
 const AdminHome =() => {
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ const AdminHome =() => {
             </div>
             <h1>Welcome Admin!</h1>
             <h2>This is a website that allows you to view superhero information, view favorited lists of superheroes, and more!</h2>
+            
             <AddAdmin />
             <DisableUser />
             <ReviewManager />
@@ -38,6 +40,7 @@ const AdminHome =() => {
             <AddList />
             <ViewLists />
             <AuthPublicLists/>
+            <DisplayReports />
             
             <h2>DMCA Notice and Takedown Policy Implementation Workflow Guide</h2>
             <div className = "policy">

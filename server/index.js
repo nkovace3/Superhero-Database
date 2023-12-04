@@ -675,6 +675,44 @@ admin_router.post('/toggleReview', async (req, res) => {
     }
   });
 
+  admin_router.get('/allReports', async (req, res) => {
+    try {
+      // Fetch all reports
+      const reports = await Reports.find();
+  
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching all reports:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  admin_router.get('/getReviewById', async (req, res) => {
+    try {
+      const { reviewId } = req.query;
+  
+      // Assuming reviewId is in the format 'listId_reviewId'
+      const [listId, reviewIdInList] = reviewId.split('_');
+  
+      // Find the list with the given listId
+      const list = await List.findById(listId);
+      if (!list) {
+        return res.status(404).json({ error: 'List not found' });
+      }
+  
+      // Find the review with the given reviewIdInList
+      const review = list.reviews.find((r) => r.date.getTime() === parseInt(reviewIdInList, 10));
+      if (!review) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+  
+      res.json(review);
+    } catch (error) {
+      console.error('Error fetching review by ID:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 //Declares routers
 app.use("/api/info", info_router);
 app.use("/api/powers", power_router);
