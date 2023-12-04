@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
 const admin = require('firebase-admin');
-const Fuse = require('fuse.js')
 const Schema = mongoose.Schema;
 const stringSimilarity = require('string-similarity');
 const app = express();
@@ -14,10 +13,18 @@ const unauth_router = express.Router();
 const auth_router = express.Router();
 const admin_router = express.Router();
 
-mongoose.connect('mongodb://localhost/listdb')
-.then(() => {
-    console.log('Mongodb connected!');
+const atlasConnectionString = "mongodb+srv://nkovace3:lab4jagath@lab4.msemxbq.mongodb.net/?retryWrites=true&w=majority";
+mongoose.connect(atlasConnectionString, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
+.then(() => {
+  console.log("MongoDB is now connected to Atlas");
+})
+.catch((error) => {
+  console.error('Error connecting to MongoDB Atlas:', error);
+});
+
 
 const ListSchema = new Schema({
     list_name: {
