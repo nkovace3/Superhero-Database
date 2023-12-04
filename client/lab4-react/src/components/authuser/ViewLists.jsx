@@ -1,3 +1,4 @@
+// Import necessary modules and components from React, Firebase authentication, Axios, and local components
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import axios from 'axios';
@@ -5,12 +6,15 @@ import ExpandableSearchResults from '../unauthuser/ExpandableSearchResults';
 import DeleteList from './DeleteList';
 import AddList from './AddList';
 
+// Define the functional component ViewLists
 const ViewLists = () => {
+  // State variables to manage user, lists, editing state, and selected list
   const [user, setUser] = useState(null);
   const [lists, setLists] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedList, setSelectedList] = useState(null);
 
+  // Effect hook to fetch user and lists data on component mount
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -26,6 +30,7 @@ const ViewLists = () => {
     return () => unsubscribe();
   }, []);
 
+  // Function to fetch hero information for a given ID
   const fetchHeroInfo = async (id) => {
     try {
       const response = await axios.get(`/api/info/${id}`);
@@ -42,6 +47,7 @@ const ViewLists = () => {
     }
   };
 
+  // Function to fetch lists for the given username, including hero information
   const fetchLists = async (username) => {
     try {
       const response = await axios.get(`/api/auth/lists/${username}`);
@@ -65,22 +71,26 @@ const ViewLists = () => {
     }
   };
 
+  // Function to handle the click event for editing a list
   const handleEditClick = (list) => {
     setSelectedList(list);
     setIsEditing(true);
   };
 
+  // Function to handle canceling the editing state
   const handleCancelEdit = () => {
     setSelectedList(null);
     setIsEditing(false);
   };
 
+  // Render the UI for viewing personal lists
   return (
     <div>
       <h2>View Personal Lists</h2>
       {user && (
         <div>
           <ul>
+            {/* Map through the lists and render ExpandableSearchResults for each list */}
             {lists.map((list) => (
               <li key={list.list_name}>
                 <ExpandableSearchResults
@@ -146,7 +156,9 @@ const ViewLists = () => {
                       >
                         Edit
                       </span>
+                      {/* Render the DeleteList component for each list */}
                       <DeleteList listName={list.list_name} onDelete={() => fetchLists(user.displayName)} />
+                      {/* Render the AddList component when editing is true and the list matches the selected list */}
                       {isEditing && list.list_name === selectedList.list_name && (
                         <AddList
                           isEditing={isEditing}
@@ -156,31 +168,33 @@ const ViewLists = () => {
                         />
                       )}
                       <div>
-                      <span style={{ fontWeight: 'bold' }}>
-                        {list.rating.length > 0
-                          ? `Avg Rating: ${(list.rating.reduce((sum, num) => sum + num, 0) / list.rating.length).toFixed(1)}`
-                          : 'No Ratings'}
-                      </span>
+                        <span style={{ fontWeight: 'bold' }}>
+                          {list.rating.length > 0
+                            ? `Avg Rating: ${(list.rating.reduce((sum, num) => sum + num, 0) / list.rating.length).toFixed(1)}`
+                            : 'No Ratings'}
+                        </span>
                       </div>
+                      {/* Render reviews if available */}
                       {list.reviews.length > 0 && (
                         <div>
-                        {list.reviews.some(review => review.hidden) && (
-                          <div>
-                            <span style={{ fontWeight: 'bold' }}>Reviews:</span>
-                            <ul>
-                              {list.reviews
-                                .filter(review => review.hidden)
-                                .map(review => (
-                                  <li key={review.date}>
-                                    <div>{`${review.username}: ${review.review}`}</div>
-                                    <div>{new Date(review.date).toLocaleDateString()}</div>
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                          {/* Render hidden reviews if any */}
+                          {list.reviews.some(review => review.hidden) && (
+                            <div>
+                              <span style={{ fontWeight: 'bold' }}>Reviews:</span>
+                              <ul>
+                                {list.reviews
+                                  .filter(review => review.hidden)
+                                  .map(review => (
+                                    <li key={review.date}>
+                                      <div>{`${review.username}: ${review.review}`}</div>
+                                      <div>{new Date(review.date).toLocaleDateString()}</div>
+                                    </li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </>
                   }
                 />
@@ -193,4 +207,5 @@ const ViewLists = () => {
   );
 };
 
+// Export the ViewLists component as the default export
 export default ViewLists;

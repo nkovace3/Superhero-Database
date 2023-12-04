@@ -70,7 +70,6 @@ const ListSchema = new Schema({
     }
 });
 
-// ListSchema.index({list_name: 1, username: 1}, {unique: true});
 ListSchema.index({list_name: 1, username: 1});
 
 
@@ -659,12 +658,6 @@ admin_router.post('/toggleReview', async (req, res) => {
   admin_router.post('/reportSubmit', async (req, res) => {
     try {
       const { reviewId, reportText, reportType } = req.body;
-  
-      // Assuming that reviewId is in the format 'listId_reviewId'
-  
-      // Find the list with the given listId and review with reviewIdInList
-  
-      // Create a new Report document
       const newReport = new Reports({
         reviewId,
         reportText,

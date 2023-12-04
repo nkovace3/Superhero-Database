@@ -1,16 +1,20 @@
+// Import necessary modules and components from React, Axios, Firebase, and other libraries
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ExpandableSearchResults from '../unauthuser/ExpandableSearchResults';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../authentication';
 
+// Define the functional component AuthPublicLists
 const AuthPublicLists = () => {
+  // State variables to manage public lists, display name, selected list, ratings, and reviews
   const [publicLists, setPublicLists] = useState([]);
   const [displayName, setDisplayName] = useState('');
   const [selectedList, setSelectedList] = useState(null);
   const [ratings, setRatings] = useState({});
   const [reviews, setReviews] = useState({});
 
+  // Effect hook to set up authentication state and fetch recent public lists
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -22,6 +26,7 @@ const AuthPublicLists = () => {
     return () => unsubscribe();
   }, []);
 
+  // Function to fetch hero information based on the provided ID
   const fetchHeroInfo = async (id) => {
     try {
       const response = await axios.get(`/api/info/${id}`);
@@ -38,6 +43,7 @@ const AuthPublicLists = () => {
     }
   };
 
+  // Function to fetch recent public lists for the given display name
   const fetchRecentPublicLists = async (displayName) => {
     try {
       const user = auth.currentUser;
@@ -67,6 +73,7 @@ const AuthPublicLists = () => {
     }
   };
 
+  // Function to handle the submission of a review for a specific list
   const handleReviewSubmit = async (listName) => {
     try {
       const user = auth.currentUser;
@@ -90,20 +97,26 @@ const AuthPublicLists = () => {
     }
   };
 
+  // Function to handle the selection of a list
   const handleListSelect = (listName) => {
     setSelectedList(listName);
   };
 
+  // Render the AuthPublicLists component
   return (
     <div>
+      {/* Render the title for the section */}
       <h2>Recent Public Lists</h2>
+      {/* Render the list of public lists */}
       <ul>
         {publicLists.map((list) => (
           <li key={list.list_name}>
+            {/* Render an ExpandableSearchResults component for each list */}
             <ExpandableSearchResults
               title={list.list_name}
               content={
                 <>
+                  {/* Render list details and metadata */}
                   <div>
                     <span style={{ fontWeight: 'bold' }}>{list.description}</span>
                   </div>
@@ -120,9 +133,11 @@ const AuthPublicLists = () => {
                       : 'No Ratings'}
                   </span>
                   </div>
+                  {/* Render hero information for each hero in the list */}
                   {list.heroInfo &&
                         list.heroInfo.map((hero) => (
                           <div key={hero.id}>
+                            {/* Render an ExpandableSearchResults component for each hero */}
                             <ExpandableSearchResults
                               title={`${hero.name} - ${hero.Publisher}`}
                               content={
@@ -149,10 +164,12 @@ const AuthPublicLists = () => {
                                   <div>
                                     <span style={{ fontWeight: 'bold' }}>Powers</span>
                                   </div>
+                                  {/* Render hero powers */}
                                   {hero["powers"] &&
                                     Object.keys(hero["powers"]).map((key) => (
                                       <div key={key}>{key}</div>
                                     ))}
+                                  {/* Render a link to search for the hero on DuckDuckGo */}
                                   <a
                                     href={`https://duckduckgo.com/?q=${hero.name} ${hero.Publisher}`}
                                     target="_blank"
@@ -165,6 +182,7 @@ const AuthPublicLists = () => {
                             />
                           </div>
                         ))}
+                        {/* Render a form for submitting reviews */}
                         <div>
                     <form onSubmit={(e) => {
                       e.preventDefault();
@@ -188,6 +206,7 @@ const AuthPublicLists = () => {
                         />
                       </label>
                       <br />
+                      {/* Render a button to submit the review */}
                       <button type="submit">Submit Review</button>
                     </form>
                   </div>
@@ -203,4 +222,5 @@ const AuthPublicLists = () => {
   );
 };
 
+// Export the AuthPublicLists component as the default export
 export default AuthPublicLists;

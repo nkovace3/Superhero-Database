@@ -4,7 +4,7 @@
     align-items: center;
     flex-direction: row;
     background-color: #0060AA;
-    padding: 20px; /* Add padding for spacing inside the box */
+    padding: 20px; 
     border-radius: 8px;
     margin-left: 50px;
     margin-right: 50px;
@@ -13,17 +13,17 @@
   
   .search-box {
     flex: 1;
-    margin-right: 10px; /* Adjust the spacing between search boxes */
+    margin-right: 10px; 
     display: flex;
     align-items: center;
   }
   
   label {
-    margin-right: 5px; /* Adjust the spacing between label and input */
+    margin-right: 5px; 
   }
   
   #submit-btn {
-    margin-left: 10px; /* Adjust the spacing between search boxes and the button */
+    margin-left: 10px; 
   }
 
   ul {

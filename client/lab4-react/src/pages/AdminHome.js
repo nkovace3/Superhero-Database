@@ -1,3 +1,4 @@
+// Import necessary dependencies and components
 import React from 'react';
 import { auth } from '../authentication';
 import '../components/css/AddList.css';
@@ -12,7 +13,9 @@ import ReviewManager from '../components/admin/ReviewManager';
 import PolicyUpdate from '../components/admin/PolicyUpdate';
 import DisplayReports from '../components/admin/DisplayReports';
 
+// Define the functional component AdminHome
 const AdminHome =() => {
+    // Initialize the navigate function from react-router-dom
     const navigate = useNavigate();
     return (
         <>
@@ -116,4 +119,5 @@ const AdminHome =() => {
     )
 };
 
+// Export the AdminHome component as the default export
 export default AdminHome;

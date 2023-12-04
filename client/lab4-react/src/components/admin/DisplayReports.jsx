@@ -1,79 +1,30 @@
-// import React, { useState, useEffect } from 'react';
-
-// const DisplayReports = () => {
-//   const [reports, setReports] = useState([]);
-
-//   useEffect(() => {
-//     // Fetch reports from your API when the component mounts
-//     fetchReports();
-//   }, []);
-
-//   const fetchReports = async () => {
-//     try {
-//       const response = await fetch('/api/admin/allReports'); // Replace with your actual API endpoint
-//       if (!response.ok) {
-//         throw new Error('Failed to fetch reports');
-//       }
-
-//       const data = await response.json();
-//       setReports(data);
-//     } catch (error) {
-//       console.error('Error fetching reports:', error);
-//     }
-//   };
-
-//   const fetchReviewById = async (reviewId) => {
-//     try {
-//       const response = await fetch(`/api/admin/getReviewById?reviewId=${reviewId}`);
-//       if (!response.ok) {
-//         throw new Error('Failed to fetch review');
-//       }
-
-//       const reviewData = await response.json();
-//       console.log('Fetched Review:', reviewData);
-//       // Handle the fetched review data as needed
-//     } catch (error) {
-//       console.error('Error fetching review by ID:', error);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Reports</h2>
-//       {reports.map((report) => (
-//         <div key={report._id}>
-//           <p>Review ID: {report.reviewId}</p>
-//           <p>Report Text: {report.reportText}</p>
-//           <p>Report Type: {report.reportType}</p>
-//           <p>Date: {new Date(report.date).toLocaleString()}</p>
-//           <button onClick={() => fetchReviewById(report.reviewId)}>
-//             Fetch Review
-//           </button>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default DisplayReports;
+// Import necessary modules and components from React
 import React, { useState, useEffect } from 'react';
 
+// Define the functional component ReportComponent
 const ReportComponent = () => {
+  // State variables for storing reports and associated reviews
   const [reports, setReports] = useState([]);
   const [reviews, setReviews] = useState({});
 
+  // useEffect hook to fetch reports when the component mounts
   useEffect(() => {
-    // Fetch reports from your API when the component mounts
+    // Fetch reports from the server
     fetchReports();
   }, []);
 
+  // Function to fetch reports from the server
   const fetchReports = async () => {
     try {
-      const response = await fetch('/api/admin/allReports'); // Replace with your actual API endpoint
+      // Fetch reports from the API endpoint
+      const response = await fetch('/api/admin/allReports');
+      
+      // Check if the fetch operation was successful
       if (!response.ok) {
         throw new Error('Failed to fetch reports');
       }
 
+      // Parse the response and update the reports state
       const data = await response.json();
       setReports(data);
 
@@ -81,12 +32,15 @@ const ReportComponent = () => {
       const reviewIds = data.map((report) => report.reviewId);
       await fetchReviews(reviewIds);
     } catch (error) {
+      // Handle errors during the fetch operation
       console.error('Error fetching reports:', error);
     }
   };
 
+  // Function to fetch reviews based on reviewIds
   const fetchReviews = async (reviewIds) => {
     try {
+      // Fetch reviews for each reviewId using Promise.all
       const reviewsData = await Promise.all(
         reviewIds.map(async (reviewId) => {
           const response = await fetch(`/api/admin/getReviewById?reviewId=${reviewId}`);
@@ -103,33 +57,38 @@ const ReportComponent = () => {
         reviewsMap[reviewId] = reviewsData[index];
       });
 
+      // Update the reviews state with the fetched data
       setReviews(reviewsMap);
     } catch (error) {
+      // Handle errors during the fetch operation
       console.error('Error fetching reviews:', error);
     }
   };
 
+  // Render the component UI
   return (
     <div>
       <h2>Reports</h2>
       <div className='user-list-container'>
-      {reports.map((report) => (
-        <div key={report._id}>
-          <p>Report Text: {report.reportText}</p>
-          <p>Report Type: {report.reportType}</p>
-          <p>Date: {new Date(report.date).toLocaleString()}</p>
-          {reviews[report.reviewId] && (
-            <div>
-              <p>Review Contents: {reviews[report.reviewId].review}</p>
-              <p>Username: {reviews[report.reviewId].username}</p>
-            </div>
-          )}
-        </div>
-      ))}
+        {/* Display each report and its associated review information */}
+        {reports.map((report) => (
+          <div key={report._id}>
+            <p>Report Text: {report.reportText}</p>
+            <p>Report Type: {report.reportType}</p>
+            <p>Date: {new Date(report.date).toLocaleString()}</p>
+            {/* Display review contents if available */}
+            {reviews[report.reviewId] && (
+              <div>
+                <p>Review Contents: {reviews[report.reviewId].review}</p>
+                <p>Username: {reviews[report.reviewId].username}</p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
+// Export the ReportComponent component as the default export
 export default ReportComponent;
-
