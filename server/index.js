@@ -12,6 +12,23 @@ const list_router = express.Router();
 const unauth_router = express.Router();
 const auth_router = express.Router();
 const admin_router = express.Router();
+const path = require('path');
+
+const _dirname = path.dirname("");
+const buildPath = path.join(_dirname, '../client/lab4-react/build');
+app.use(express.static(buildPath));
+app.get('/', function (req, res) {
+
+    res.sendFile(
+        path.join(_dirname, '../client/lab4-react/build/index.html'),
+        function (err) {
+            if(err) {
+                res.status(500).send(err);
+            }
+
+        }
+    );
+})
 
 const atlasConnectionString = "mongodb+srv://nkovace3:lab4jagath@lab4.msemxbq.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(atlasConnectionString, {
